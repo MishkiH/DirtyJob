@@ -1,0 +1,72 @@
+cmake_minimum_required(VERSION 3.15)
+project(DirtyJob VERSION 0.1.0 LANGUAGES CXX)
+
+# Установка стандарта C++
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Настройки компилятора
+if(MSVC)
+    add_compile_options(/W4 /utf-8)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# Включение директорий с заголовочными файлами
+include_directories(${CMAKE_SOURCE_DIR})
+
+# Исходные файлы
+set(SOURCES
+    src/main.cpp
+    src/Console.cpp
+    src/Entity.cpp
+    src/GameEngine.cpp
+    src/MailSystem.cpp
+    src/DiarySystem.cpp
+    src/Shop.cpp
+    src/WorkspaceManager.cpp
+    src/components/HasInventory.cpp
+    src/components/HasStats.cpp
+)
+
+# Заголовочные файлы
+set(HEADERS
+    include/Component.hpp
+    include/Console.hpp
+    include/Entity.hpp
+    include/GameEngine.hpp
+    include/MailSystem.hpp
+    include/DiarySystem.hpp
+    include/Shop.hpp
+    include/WorkspaceManager.hpp
+    include/components/HasInventory.hpp
+    include/components/HasStats.hpp
+)
+
+# Создание исполняемого файла
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+# Настройки для разных платформ
+if(WIN32)
+    # Для Windows - установка кодировки UTF-8
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY WIN32_EXECUTABLE TRUE)
+endif()
+
+# Создание директорий для сборки
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets/sfx)
+
+# Копирование ресурсов (если они есть)
+if(EXISTS ${CMAKE_SOURCE_DIR}/data)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/ DESTINATION ${CMAKE_BINARY_DIR}/data/)
+endif()
+
+if(EXISTS ${CMAKE_SOURCE_DIR}/assets)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_BINARY_DIR}/assets/)
+endif()
+
+# Установка
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(DIRECTORY data/ DESTINATION share/${PROJECT_NAME}/data OPTIONAL)
+install(DIRECTORY assets/ DESTINATION share/${PROJECT_NAME}/assets OPTIONAL)
