@@ -2,12 +2,15 @@ DirtyJob — консольная текстовая RPG о хакере-фри�
 
 # Сборка:
 mkdir build
+
 cd build
-cmake ..
-make
+
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+cmake --build .
 
 # Запуск:
-./DirtyJob
+./DirtyJob.exe
 
 # Данные:
 - письма и дневник: data/
