@@ -1,32 +1,30 @@
-#pragma once
-#include "Entity.hpp"
-#include "components/HasInventory.hpp"
+#ifndef SHOP_HPP_
+#define SHOP_HPP_
+
 #include <vector>
 #include <string>
+#include <map>
+#include "Player.hpp"
 
 struct ShopItem {
-    std::string name;
-    std::string description;
-    std::string category;
-    int price;
-    std::string type;
-    
-    ShopItem(const std::string& n, const std::string& desc, const std::string& cat, int p, const std::string& t)
-        : name(n), description(desc), category(cat), price(p), type(t) {}
+  std::string id;
+  std::string name;
+  double price;
+  std::string desc;
 };
 
 class Shop {
-public:
-    Shop();
-    ~Shop() = default;
-    
-    void showInterface();
-    bool processCommand(const std::string& command, Entity& player);
-    
-private:
-    std::vector<ShopItem> items;
-    
-    void displayItems() const;
-    bool buyItem(const std::string& itemName, Entity& player);
-    void initializeItems();
+ public:
+  Shop(const std::string& data_file);
+
+  void Show() const;
+  bool Buy(Player& player, const std::string& item_id);
+  const ShopItem* FindItem(const std::string& item_id) const;
+  void ApplyItem(Player& player, const std::string& item_id);
+
+ private:
+  std::vector<ShopItem> items_;
+  void LoadFromFile(const std::string& data_file);
 };
+
+#endif  // SHOP_HPP_

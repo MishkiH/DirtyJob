@@ -1,10 +1,11 @@
-#include "include/GameEngine.hpp"
-#include "include/Console.hpp"
-#include <iostream>
+#include "GameManager.hpp"
+#include "windows.h"
 
 int main() {
-    Console::init();
-    GameEngine engine;
-    engine.run();
-    return 0;
+  SetConsoleCP(CP_UTF8);
+  SetConsoleOutputCP(CP_UTF8);
+
+  GameManager game;
+  game.Run();
+  return 0;
 }

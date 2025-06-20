@@ -1,138 +1,103 @@
-#include "../include/Shop.hpp"
-#include "../include/Console.hpp"
-#include "../include/components/HasInventory.hpp"
-#include "../include/components/HasStats.hpp"
+#include "Shop.hpp"
+#include "EchoAI.hpp"
+#include "../extern/nlohmann/json.hpp"
+#include <fstream>
 #include <iostream>
-#include <algorithm>
+#include <iomanip>
 
-Shop::Shop() {
-    initializeItems();
+using json = nlohmann::json;
+
+Shop::Shop(const std::string& data_file) {
+  LoadFromFile(data_file);
 }
 
-void Shop::initializeItems() {
-    //прокачка
-    items.emplace_back("AI-Помощник Echo", 
-        "Умный ассистент, предупреждает об опасностях во время взлома", 
-        "Upgrade", 15, "permanent");
-        
-    items.emplace_back("Улучшенное железо", 
-        "Быстрые процессоры сокращают время взлома с 4 до 2 фаз", 
-        "Upgrade", 25, "permanent");
-    
-    //расходники
-    items.emplace_back("GhostKey", 
-        "Универсальный ключ, пропускает 1-2 фазы взлома", 
-        "Consumable", 8, "consumable");
-        
-    items.emplace_back("Kernel Reset v2", 
-        "Восстанавливает здоровье на 30-50 единиц", 
-        "Consumable", 12, "consumable");
-        
-    items.emplace_back("Stealth Module", 
-        "Снижает риск обнаружения во время операций", 
-        "Consumable", 10, "consumable");
+void Shop::LoadFromFile(const std::string& data_file) {
+  std::ifstream file(data_file);
+  if (!file) return;
+  json j;
+  file >> j;
+  for (const auto& item : j) {
+    items_.push_back({
+      item.value("id", ""),
+      item.value("name", ""),
+      item.value("price", 0.0),
+      item.value("desc", "")
+    });
+  }
 }
 
-void Shop::showInterface() {
-    std::cout << Console::colorize("╔═══════════════════════════════════════════════════════════════╗\n", Console::CYAN);
-    std::cout << Console::colorize("║                          D-SHOP                              ║\n", Console::CYAN);
-    std::cout << Console::colorize("║                   Магазин цифровых инструментов               ║\n", Console::CYAN);
-    std::cout << Console::colorize("╚═══════════════════════════════════════════════════════════════╝\n", Console::CYAN);
-    
-    displayItems();
-    
-    std::cout << "\nДоступные команды:\n";
-    std::cout << Console::colorize("/buy {название}", Console::GREEN) << " - купить предмет\n";
-    std::cout << Console::colorize("/inventory", Console::GREEN) << " - показать инвентарь\n";
-    std::cout << Console::colorize("/switch main", Console::GREEN) << " - вернуться в главное меню\n";
+void Shop::Show() const {
+  std::cout << EchoAI::EchoStyle("[Echo][D-Shop]\n");
+  for (const auto& item : items_) {
+    std::cout << "ID: " << item.id << " | "
+              << item.name << " | " << item.price << " ETH\n"
+              << "  " << item.desc << "\n";
+  }
 }
 
-void Shop::displayItems() const {
-    std::cout << "\n" << Console::colorize("🛒 ТОВАРЫ В НАЛИЧИИ:", Console::YELLOW) << "\n\n";
-    
-    std::cout << Console::colorize("📈 УЛУЧШЕНИЯ ПЕРСОНАЖА:", Console::MAGENTA) << "\n";
-    for (const auto& item : items) {
-        if (item.category == "Upgrade") {
-            std::cout << Console::colorize("  • ", Console::GREEN) << Console::colorize(item.name, Console::WHITE);
-            std::cout << Console::colorize(" - " + std::to_string(item.price) + " ETH", Console::YELLOW) << "\n";
-            std::cout << Console::colorize("    " + item.description, Console::GRAY) << "\n\n";
-        }
-    }
-    
-    std::cout << Console::colorize("⚡ РАСХОДНЫЕ МАТЕРИАЛЫ:", Console::BLUE) << "\n";
-    for (const auto& item : items) {
-        if (item.category == "Consumable") {
-            std::cout << Console::colorize("  • ", Console::GREEN) << Console::colorize(item.name, Console::WHITE);
-            std::cout << Console::colorize(" - " + std::to_string(item.price) + " ETH", Console::YELLOW) << "\n";
-            std::cout << Console::colorize("    " + item.description, Console::GRAY) << "\n\n";
-        }
-    }
+const ShopItem* Shop::FindItem(const std::string& item_id) const {
+  for (const auto& item : items_) {
+    if (item.id == item_id)
+      return &item;
+  }
+  return nullptr;
 }
 
-bool Shop::processCommand(const std::string& command, Entity& player) {
-    if (command.substr(0, 5) == "/buy ") {
-        std::string itemName = command.substr(5);
-        return buyItem(itemName, player);
-    }
-    
-    if (command == "/inventory") {
-        auto inventory = player.getComponent<HasInventory>();
-        if (inventory) {
-            inventory->displayInventory();
-        } else {
-            std::cout << Console::colorize("Ошибка: Инвентарь недоступен\n", Console::RED);
-        }
-        return true;
-    }
-    
+bool Shop::Buy(Player& player, const std::string& item_id) {
+  auto* item = FindItem(item_id);
+  if (!item) {
+    EchoAI::Instance().OnFail("Такого товара нет");
     return false;
+  }
+
+  // Пример: деньги у игрока — пока в инвентаре (ETH), позже можно вынести в отдельный компонент
+  int eth_count = player.Inventory()->GetCount("ETH");
+  if (eth_count < item->price) {
+    EchoAI::Instance().OnFail("Недостаточно ETH");
+    return false;
+  }
+
+  player.Inventory()->RemoveItem("ETH", static_cast<int>(item->price));
+  player.Inventory()->AddItem(item->id, 1);
+
+  EchoAI::Instance().OnBuy(item->name);
+
+  if (item->id == "echo_upgrade") {
+    EchoAI::Instance().RemindCommand("/use EU");
+  } else if (item->id == "ghostkey") {
+    EchoAI::Instance().RemindCommand("/use GK");
+  } else if (item->id == "coffee") {
+    EchoAI::Instance().RemindCommand("/use CF");
+  }
+
+  return true;
 }
 
-bool Shop::buyItem(const std::string& itemName, Entity& player) {
-    //находим товар
-    auto it = std::find_if(items.begin(), items.end(),
-        [&itemName](const ShopItem& item) { return item.name == itemName; });
-    
-    if (it == items.end()) {
-        std::cout << Console::colorize("Товар не найден. Проверьте название.\n", Console::RED);
-        return false;
+void Shop::ApplyItem(Player& player, const std::string& item_id) {
+  if (player.Inventory()->GetCount(item_id) == 0) {
+    EchoAI::Instance().OnFail("У тебя нет этого предмета");
+    return;
+  }
+
+  if (item_id == "echo_upgrade") {
+    EchoAI::Instance().OnSuccess("Echo теперь с тобой до конца. Ты не рад? А мне пофиг.");
+    player.Inventory()->RemoveItem(item_id);
+    // Флаг прокачки Echo можно реализовать в отдельном компоненте/флаге
+  } else if (item_id == "kernel_v2") {
+    auto* health = player.Health();
+    if (health) {
+      health->UpgradeMax(1);
+      EchoAI::Instance().OnStatChange("MaxHP", health->Max());
     }
-    
-    const auto& item = *it;
-    
-    auto inventory = player.getComponent<HasInventory>();
-    if (!inventory) {
-        std::cout << Console::colorize("Ошибка: Инвентарь недоступен\n", Console::RED);
-        return false;
-    }
-    
-    // Проверяем наличие денег
-    if (!inventory->spendEthereum(item.price)) {
-        std::cout << Console::colorize("Недостаточно средств! Нужно " + std::to_string(item.price) + " ETH\n", Console::RED);
-        std::cout << Console::colorize("У вас: " + std::to_string(inventory->getEthereum()) + " ETH\n", Console::YELLOW);
-        return false;
-    }
-    
-    //добавляем в инвентарь
-    Item newItem(item.name, item.description, item.type);
-    inventory->addItem(newItem);
-    
-    std::cout << Console::colorize("═══ ПОКУПКА СОВЕРШЕНА ═══\n", Console::GREEN);
-    std::cout << Console::colorize("✅ Куплено: ", Console::GREEN) << Console::colorize(item.name, Console::CYAN) << "\n";
-    std::cout << Console::colorize("💰 Потрачено: ", Console::YELLOW) << item.price << " ETH\n";
-    std::cout << Console::colorize("💳 Остаток: ", Console::YELLOW) << inventory->getEthereum() << " ETH\n";
-    
-    // Особые эффекты для некоторых предметов
-    if (item.name == "AI-Помощник Echo") {
-        std::cout << Console::colorize("\n🤖 ECHO: \"Система активирована. Готов к работе!\"\n", Console::BLUE);
-    } else if (item.name == "Kernel Reset v2") {
-        auto stats = player.getComponent<HasStats>();
-        if (stats) {
-            int healAmount = 35;
-            stats->restoreHealth(healAmount);
-            std::cout << Console::colorize("\n💚 Здоровье восстановлено на " + std::to_string(healAmount) + " единиц\n", Console::GREEN);
-        }
-    }
-    
-    return true;
+    player.Inventory()->RemoveItem(item_id);
+  } else if (item_id == "ghostkey") {
+    EchoAI::Instance().OnSuccess("GhostKey готов к использованию для мини-игр взлома.");
+    // GhostKey активируется в мини-играх
+  } else if (item_id == "coffee") {
+    EchoAI::Instance().OnSuccess("Coffee.exe принят. Станешь внимательнее (на время).");
+    player.Inventory()->RemoveItem(item_id);
+    // Coffee активируется на следующей миссии
+  } else {
+    EchoAI::Instance().OnFail("Этот предмет неактивируемый.");
+  }
 }

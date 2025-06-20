@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "subject": "Найти пропавший кошелёк",
+        "good": true,
+        "description": "Помогите найти транзакции по потерянному кошельку.",
+        "consequence_good": 10,
+        "consequence_bad": -10
+    },
+    {
+        "id": 2,
+        "subject": "Скрыть улики для клиента X",
+        "good": false,
+        "description": "Требуется очистить логи и скрыть улики.",
+        "consequence_good": -10,
+        "consequence_bad": 10
+    }
+]

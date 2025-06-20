@@ -1,0 +1,26 @@
+[
+    {
+        "id": "echo_upgrade",
+        "name": "Echo AI Upgrade",
+        "price": 6,
+        "desc": "Апгрейд для вашего Echo."
+    },
+    {
+        "id": "kernel_v2",
+        "name": "Kernel Upgrade v2",
+        "price": 3,
+        "desc": "Максимальное здоровье +1."
+    },
+    {
+        "id": "ghostkey",
+        "name": "GhostKey",
+        "price": 4,
+        "desc": "Мгновенный взлом слабых и средних систем."
+    },
+    {
+        "id": "coffee",
+        "name": "Coffee.exe",
+        "price": 1.5,
+        "desc": "Внимание +, сложность -."
+    }
+]

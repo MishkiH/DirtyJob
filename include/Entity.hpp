@@ -1,49 +1,42 @@
-#pragma once
-#include "Component.hpp"
+#ifndef ENTITY_HPP_
+#define ENTITY_HPP_
+
+#include <map>
 #include <memory>
-#include <unordered_map>
-#include <typeindex>
 #include <string>
+#include <typeinfo>
+#include <typeindex>
+#include "Component.hpp"
 
 class Entity {
-public:
-    explicit Entity(const std::string& name = "Unknown");
-    ~Entity() = default;
-    
-    //добавление компонента
-    template<typename T>
-    void addComponent(std::unique_ptr<T> component) {
-        static_assert(std::is_base_of_v<Component, T>, "T must inherit from Component");
-        components[std::type_index(typeid(T))] = std::move(component);
+ public:
+  Entity() = default;
+  ~Entity() = default;
+
+  // Добавить компонент к сущности (владеем через unique_ptr)
+  template <typename T>
+  void AddComponent(std::unique_ptr<T> component) {
+    components_[std::type_index(typeid(T))] = std::move(component);
+  }
+
+  // Получить компонент, если он есть (nullptr если нет)
+  template <typename T>
+  T* GetComponent() {
+    auto it = components_.find(std::type_index(typeid(T)));
+    if (it != components_.end()) {
+      return dynamic_cast<T*>(it->second.get());
     }
-    
-    //получение компонента
-    template<typename T>
-    T* getComponent() {
-        static_assert(std::is_base_of_v<Component, T>, "T must inherit from Component");
-        auto it = components.find(std::type_index(typeid(T)));
-        if (it != components.end()) {
-            return static_cast<T*>(it->second.get());
-        }
-        return nullptr;
-    }
-    
-    //проверка наличия компонента
-    template<typename T>
-    bool hasComponent() const {
-        return components.find(std::type_index(typeid(T))) != components.end();
-    }
-    
-    //удаление компонента
-    template<typename T>
-    void removeComponent() {
-        components.erase(std::type_index(typeid(T)));
-    }
-    
-    const std::string& getName() const { return name; }
-    void setName(const std::string& newName) { name = newName; }
-    
-private:
-    std::string name;
-    std::unordered_map<std::type_index, std::unique_ptr<Component>> components;
+    return nullptr;
+  }
+
+  // Удалить компонент
+  template <typename T>
+  void RemoveComponent() {
+    components_.erase(std::type_index(typeid(T)));
+  }
+
+ private:
+  std::map<std::type_index, std::unique_ptr<Component>> components_;
 };
+
+#endif  // ENTITY_HPP_
