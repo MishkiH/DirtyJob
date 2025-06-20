@@ -11,7 +11,9 @@ Mail::Mail(const std::string& data_file) {
 
 void Mail::LoadFromFile(const std::string& data_file) {
   std::ifstream file(data_file);
-  if (!file) return;
+  if (!file) {
+    std::cerr << "[DEBUG] Не удалось открыть файл: " << data_file << std::endl;
+    return; }
   json j;
   file >> j;
   for (const auto& entry : j) {

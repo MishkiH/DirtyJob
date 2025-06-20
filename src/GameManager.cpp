@@ -6,9 +6,9 @@
 
 GameManager::GameManager()
     : current_ws_(Workspace::Main),
-      shop_("data\shop_items.json"),
-      mail_("data\mail.json"),
-      diary_("data\diary.json") {
+      shop_("../data/shop_items.json"),
+      mail_("../data/mail.json"),
+      diary_("../data/diary.json") {
   GenerateWorkspaceIds();
   current_ws_id_ = ws_ids_[current_ws_];
 }
@@ -165,7 +165,7 @@ void GameManager::StartMission(int mail_num) {
   // Выбор мини-игры по сценарию
   bool success = false;
   if (mail_entry->id == 1) { // Пример для первой миссии
-    current_mini_game_ = std::make_unique<FWByPass>("MiniGames\fwby_maze.json");
+    current_mini_game_ = std::make_unique<FWByPass>("../MiniGames/fwby_maze.json");
     success = current_mini_game_->Play();
   } else if (mail_entry->id == 2) {
     current_mini_game_ = std::make_unique<BruteForcer>();
