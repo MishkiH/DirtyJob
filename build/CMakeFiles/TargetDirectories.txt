@@ -1,0 +1,3 @@
+C:/Users/Meowbook/Desktop/iStudy/MyGame/DirtyJob/build/CMakeFiles/DirtyJob.dir
+C:/Users/Meowbook/Desktop/iStudy/MyGame/DirtyJob/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Meowbook/Desktop/iStudy/MyGame/DirtyJob/build/CMakeFiles/ZERO_CHECK.dir

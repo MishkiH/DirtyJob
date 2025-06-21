@@ -1,11 +1,13 @@
 #include "MiniGames_FWByPass.hpp"
 #include "EchoAI.hpp"
 #include "../extern/nlohmann/json.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <fstream>
 #include <random>
 #include <chrono>
 #include <thread>
+#include <conio.h>
 
 using json = nlohmann::json;
 
@@ -26,6 +28,11 @@ void FWByPass::LoadRandomMaze(const std::string& maze_file) {
   int maze_count = static_cast<int>(j.size());
   if (maze_count == 0) return;
   int idx = std::random_device{}() % maze_count;
+  const auto& maze_obj = j[idx];
+
+  max_moves_ = maze_obj.value("max_moves", 30);     // <- значение из json или 30
+  time_limit_ = maze_obj.value("time_limit", 60);   // <- значение из json или 60
+
   const auto& maze_json = j[idx]["maze"];
   rows_ = static_cast<int>(maze_json.size());
   cols_ = static_cast<int>(maze_json[0].get<std::string>().size());
@@ -90,26 +97,43 @@ bool FWByPass::MovePlayer(char dir) {
 // Логика самой мини-игры (упрощённая, без фаз зоны)
 bool FWByPass::Play() {
   EchoAI::Instance().OnMiniGameStart(Name());
+  auto time_start = std::chrono::steady_clock::now();
   bool win = false;
   int max_moves = 30;
   int moves = 0;
   PrintMaze();
   std::cout << "Управление: WASD. Выйди к E (exit). Ограничение по ходам!\n";
-  while (moves < max_moves) {
-    std::cout << "Твой ход [" << (max_moves - moves) << "]: ";
-    char ch;
-    std::cin >> ch;
-    if (MovePlayer(ch)) {
-      ++moves;
-      PrintMaze();
-      if (player_x_ == exit_x_ && player_y_ == exit_y_) {
-        win = true;
+  while (moves < max_moves_) {
+    // вычисляем оставшееся время на каждой итерации
+    auto time_now = std::chrono::steady_clock::now();
+    int seconds_left = time_limit_ - int(std::chrono::duration_cast<std::chrono::seconds>(time_now - time_start).count());
+
+    if (seconds_left <= 0) {
+        std::cout << "Время вышло!" << std::endl;
         break;
-      }
-    } else {
-      EchoAI::Instance().OnFail("Ход невозможен");
     }
-  }
+
+    Utils::ClearScreen();
+    std::cout << "Осталось ходов: " << (max_moves_ - moves)
+              << "   Времени: " << seconds_left << " сек." << std::endl;
+    PrintMaze();
+
+    std::cout << "Твой ход (WASD): ";
+
+    char ch = _getch();
+
+    std::cout << ch << std::endl;
+
+    if (MovePlayer(ch)) {
+        ++moves;
+        if (player_x_ == exit_x_ && player_y_ == exit_y_) {
+            win = true;
+            break;
+        }
+    } else {
+        EchoAI::Instance().OnFail("Ход невозможен");
+    }
+}
   EchoAI::Instance().OnMiniGameEnd(win);
   return win;
 }

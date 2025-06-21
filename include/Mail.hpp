@@ -13,6 +13,7 @@ struct MailEntry {
   bool good;        // Гуманное задание
   int consequence_good;
   int consequence_bad;
+  int reward = 0;
   bool taken = false;
   bool finished = false;
   bool rejected = false;

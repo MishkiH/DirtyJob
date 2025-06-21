@@ -112,7 +112,8 @@ void GameManager::HandleCommand(const std::string& cmd) {
     std::cout << "Отправитель: " << mail_entry->sender << std::endl;
     std::cout << "Тема: " << mail_entry->subject << std::endl;
     std::cout << "===========\n";
-    std::cout << mail_entry->content << std::endl;
+    std::cout << mail_entry->content << "\n\n";
+    std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n" << '\n';
     std::cout << "\nДля принятия заказа введите y/n. Для отмены введите /cancel\n";
     return;
 }
@@ -228,7 +229,7 @@ void GameManager::StartMissionByID(int mail_id) {
 
   if (success) {
     EchoAI::Instance().OnSuccess(mail_entry->subject);
-    player_.Inventory()->AddItem("ETH", 3); // Выдаём награду
+    player_.Inventory()->AddItem("ETH", mail_entry->reward); // Выдаём награду
     auto* moral = player_.Moral();
     if (moral)
       moral->Add(mail_entry->good ? mail_entry->consequence_good : mail_entry->consequence_bad);
