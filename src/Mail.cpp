@@ -20,7 +20,8 @@ void Mail::LoadFromFile(const std::string& data_file) {
     mails_.push_back({
       entry.value("id", 0),
       entry.value("subject", ""),
-      entry.value("description", ""),
+      entry.value("sender", "anon"),
+      entry.value("content", ""),
       entry.value("good", false),
       entry.value("consequence_good", 0),
       entry.value("consequence_bad", 0)
@@ -30,22 +31,27 @@ void Mail::LoadFromFile(const std::string& data_file) {
 
 void Mail::ShowInbox() const {
   std::cout << "\033[33m=== Входящие ===\033[0m\n";
-  int num = 1;
-  for (const auto& mail : mails_) {
-    if (!mail.taken && !mail.finished)
-      std::cout << "Письмо №" << num++ << ". Тема: " << mail.subject << "\n";
+  int num = 1;  for (const auto& mail : mails_) {
+    if (!mail.taken && !mail.finished && !mail.rejected)
+      std::cout << "Письмо №" << mail.id << ". Тема: " << mail.subject << "\n";
   }
 }
 
-const MailEntry* Mail::GetMailById(int num) const {
-  int cnt = 0;
-  for (const auto& mail : mails_) {
-    if (!mail.taken && !mail.finished) {
-      ++cnt;
-      if (cnt == num) return &mail;
-    }
+MailEntry* Mail::GetMailByID(int id) {
+  for (auto& mail : mails_) {
+    if (mail.id == id && !mail.taken && !mail.finished && !mail.rejected)
+      return &mail;
   }
   return nullptr;
+}
+
+void Mail::RejectMail(int id) {
+  for (auto& mail : mails_) {
+    if (mail.id == id) {
+      mail.rejected = true;
+      return;
+    }
+  }
 }
 
 MailEntry* Mail::Take(int num) {

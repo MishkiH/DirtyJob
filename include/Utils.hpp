@@ -5,6 +5,7 @@
 
 namespace Utils {
 
+void ClearScreen();
 std::string Color(const std::string& text, const std::string& color);
 
 }

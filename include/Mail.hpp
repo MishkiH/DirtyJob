@@ -8,12 +8,14 @@
 struct MailEntry {
   int id;
   std::string subject;
-  std::string description;
+  std::string sender;
+  std::string content;
   bool good;        // Гуманное задание
   int consequence_good;
   int consequence_bad;
   bool taken = false;
   bool finished = false;
+  bool rejected = false;
 };
 
 class Mail {
@@ -21,7 +23,8 @@ class Mail {
   Mail(const std::string& data_file);
 
   void ShowInbox() const;
-  const MailEntry* GetMailById(int num) const;
+  MailEntry* GetMailByID(int num);
+  void RejectMail(int id);
   MailEntry* Take(int num); // Берём задание, помечаем taken
 
   int Count() const { return static_cast<int>(mails_.size()); }

@@ -94,9 +94,58 @@ void GameManager::HandleCommand(const std::string& cmd) {
   else if (token == "/take") {
     int num;
     iss >> num;
-    if (num >= 1) StartMission(num);
+    if (num >= 1) StartMissionByID(num);
     else EchoAI::Instance().OnFail("Не указан номер письма");
   }
+  else if (token == "/select") {
+    int id;
+    iss >> id;
+    MailEntry* mail_entry = mail_.GetMailByID(id);
+    if (!mail_entry) {
+      EchoAI::Instance().OnFail("Письмо не найдено.");
+      return;
+    }
+    selected_mail_id_ = id;
+    awaiting_accept_reject_ = true;
+
+    Utils::ClearScreen();
+    std::cout << "Отправитель: " << mail_entry->sender << std::endl;
+    std::cout << "Тема: " << mail_entry->subject << std::endl;
+    std::cout << "===========\n";
+    std::cout << mail_entry->content << std::endl;
+    std::cout << "\nДля принятия заказа введите y/n. Для отмены введите /cancel\n";
+    return;
+}
+else if (awaiting_accept_reject_) {
+    if (cmd == "y") {
+      awaiting_accept_reject_ = false;
+      if (selected_mail_id_ != -1)
+        StartMissionByID(selected_mail_id_); // нужна новая функция
+      selected_mail_id_ = -1;
+      return;
+    } else if (cmd == "n") {
+        awaiting_accept_reject_ = false;
+        if (selected_mail_id_ != -1) {
+            MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
+            if (mail_entry) {
+                player_.Moral()->Add(mail_entry->consequence_bad);
+                mail_.RejectMail(selected_mail_id_);
+                EchoAI::Instance().OnFail("Письмо отклонено. Моральный диссидент уменьшен.");
+            }
+        }
+        selected_mail_id_ = -1;
+        ShowMail();
+        return;
+    } else if (cmd == "/cancel") {
+        awaiting_accept_reject_ = false;
+        selected_mail_id_ = -1;
+        ShowMail(); // просто возвращает к выбору писем, ничего не меняет
+        return;
+    } else {
+      std::cout << "Введите y/n или /cancel\n";
+      return;
+    }
+}
   else if (token == "/use") {
     std::string item_id;
     iss >> item_id;
@@ -130,6 +179,7 @@ GameManager::Workspace GameManager::WorkspaceById(const std::string& id) const {
 }
 
 void GameManager::ShowMail() {
+  Utils::ClearScreen();
   mail_.ShowInbox();
 }
 
@@ -154,10 +204,10 @@ void GameManager::ShowStats() {
   std::cout << "  ETH: " << player_.Inventory()->GetCount("ETH") << "\n";
 }
 
-void GameManager::StartMission(int mail_num) {
-  MailEntry* mail_entry = mail_.Take(mail_num);
+void GameManager::StartMissionByID(int mail_id) {
+  MailEntry* mail_entry = mail_.GetMailByID(mail_id);
   if (!mail_entry) {
-    EchoAI::Instance().OnFail("Письма с таким номером нет");
+    EchoAI::Instance().OnFail("Письма с таким ID нет");
     return;
   }
   EchoAI::Instance().OnPlayerAction("Принятие заказа: " + mail_entry->subject);

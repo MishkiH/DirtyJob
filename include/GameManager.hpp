@@ -34,6 +34,10 @@ class GameManager {
   Mail mail_;
   Diary diary_;
 
+  // Новые поля для выбора писем
+  int selected_mail_id_ = -1;
+  bool awaiting_accept_reject_ = false;
+
   // Кэш мини-игр (для возможного расширения)
   std::unique_ptr<MiniGame> current_mini_game_;
 
@@ -52,7 +56,7 @@ class GameManager {
   void ShowStats();
 
   // Обработка заказов, запуск мини-игр, и применение их результатов
-  void StartMission(int mail_num);
+  void StartMissionByID(int mail_id);
 
   // Служебные
   void ListWorkspaces() const;
