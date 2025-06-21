@@ -34,8 +34,29 @@ void GameManager::GenerateWorkspaceIds() {
 }
 
 void GameManager::Run() {
-  EchoAI::Instance().PrintWelcome();
-  EchoAI::Instance().PrintHelp();
+  Utils::ClearScreen();
+  // Показываем вступление из дневника (id == 0)
+const DiaryEntry* intro = diary_.FindById(0);
+if (intro && !intro->published) {
+    std::cout << "\033[35mЗапись №" << intro->id + 1 << ". Конспект.\n";
+    std::cout << "\"" << intro->title << "\"\033[0m\n\n";
+    PrintSlowlyByChar(intro->text);
+    std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
+    char ans;
+    std::cin >> ans;
+    if (ans == 'Y' || ans == 'y') {
+        DiaryEntry* published = diary_.FindById(0);
+        if (published) {
+            published->published = true;
+            auto* moral = player_.Moral();
+            if (moral) moral->Add(published->moral_effect);
+            std::cout << "Запись опубликована!\n";
+        }
+    } else {
+        std::cout << "Запись удалена.\n";
+    }
+    EchoAI::Instance().PrintWelcome();
+}
   bool running = true;
   while (running) {
     ShowPrompt();
@@ -227,15 +248,43 @@ void GameManager::StartMissionByID(int mail_id) {
     success = true;
   }
 
-  if (success) {
+if (success) {
     EchoAI::Instance().OnSuccess(mail_entry->subject);
     player_.Inventory()->AddItem("ETH", mail_entry->reward); // Выдаём награду
     auto* moral = player_.Moral();
     if (moral)
-      moral->Add(mail_entry->good ? mail_entry->consequence_good : mail_entry->consequence_bad);
-    // Можно добавить публикацию письма в дневнике через diary_
+        moral->Add(mail_entry->good ? mail_entry->consequence_good : mail_entry->consequence_bad);
     EchoAI::Instance().DiaryNote();
-  } else {
+
+    const auto& entries = diary_.Entries();
+    int found_num = 0;
+    for (size_t i = 0; i < entries.size(); ++i) {
+        const auto& entry = entries[i];
+        if (entry.mission_id && *entry.mission_id == mail_entry->id && !entry.published) {
+            ++found_num;
+            // если good — первый вариант, если bad — второй (по порядку в json!)
+            bool select_this = (mail_entry->good && found_num == 1) || (!mail_entry->good && found_num == 2);
+            if (select_this) {
+                std::cout << "\033[35mЗапись №" << entry.id + 1 << ". Конспект.\n";
+                std::cout << "\"" << entry.title << "\"\033[0m\n\n";
+                PrintSlowlyByChar(entry.text);
+                std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
+                char ans;
+                std::cin >> ans;
+                if (ans == 'Y' || ans == 'y') {
+                    DiaryEntry* pub = diary_.FindById(entry.id);
+                    if (pub) {
+                        pub->published = true;
+                        auto* moral = player_.Moral();
+                        if (moral) moral->Add(pub->moral_effect);
+                    }
+                }
+                // Если хочешь: else { /* Можно добавить штраф за удаление */ }
+                break; // выходим, обработав только одну подходящую запись!
+            }
+        }
+    }
+} else {
     auto* health = player_.Health();
     if (health) {
       health->Damage(1);

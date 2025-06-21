@@ -15,12 +15,16 @@ void Diary::LoadFromFile(const std::string& data_file) {
   json j;
   file >> j;
   for (const auto& entry : j) {
-    entries_.push_back({
-      entry.value("id", 0),
-      entry.value("title", ""),
-      entry.value("text", ""),
-      entry.value("moral_effect", 0)
-    });
+    DiaryEntry e;
+    e.id = entry.value("id", 0);
+    e.title = entry.value("title", "");
+    e.text = entry.value("text", "");
+    e.moral_effect = entry.value("moral_effect", 0);
+    if (entry.contains("mission_id") && !entry["mission_id"].is_null())
+        e.mission_id = entry["mission_id"].get<int>();
+    else
+        e.mission_id = std::nullopt;
+    entries_.push_back(e);
   }
 }
 
@@ -56,4 +60,25 @@ DiaryEntry* Diary::Publish(int num) {
     }
   }
   return nullptr;
+}
+
+const DiaryEntry* Diary::GetEntryByMissionId(int mission_id) const {
+    for (const auto& entry : entries_) {
+        if (entry.mission_id && *entry.mission_id == mission_id)
+            return &entry;
+    }
+    return nullptr;
+}
+
+const DiaryEntry* Diary::FindById(int id) const {
+    for (const auto& entry : entries_) {
+        if (entry.id == id) return &entry;
+    }
+    return nullptr;
+}
+DiaryEntry* Diary::FindById(int id) {
+    for (auto& entry : entries_) {
+        if (entry.id == id) return &entry;
+    }
+    return nullptr;
 }
