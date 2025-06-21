@@ -130,8 +130,8 @@ void GameManager::HandleCommand(const std::string& cmd) {
     awaiting_accept_reject_ = true;
 
     Utils::ClearScreen();
-    std::cout << "Отправитель: " << mail_entry->sender << std::endl;
-    std::cout << "Тема: " << mail_entry->subject << std::endl;
+    std::cout << "Отправитель: " << mail_entry->sender << '\n';
+    std::cout << "Тема: " << mail_entry->subject << '\n';
     std::cout << "===========\n";
     std::cout << mail_entry->content << "\n\n";
     std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n" << '\n';

@@ -25,7 +25,7 @@ inline void PrintSlowlyByChar(const std::string& text, unsigned ms = 30) {
         else
             std::this_thread::sleep_for(std::chrono::milliseconds(ms / 2)); // обычная задержка
     }
-    std::cout << std::endl;
+    std::cout << '\n';
 }
 
 #endif  // UTILS_HPP_

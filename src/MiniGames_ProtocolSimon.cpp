@@ -30,7 +30,7 @@ std::string Color(char key) {
 void ShowChar(char c) {
     CLEAR();
     std::cout << "Смотри внимательно:\n\n";
-    std::cout << Color(c) << c << "\033[0m" << std::endl;
+    std::cout << Color(c) << c << "\033[0m" << '\n';
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
     CLEAR();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));

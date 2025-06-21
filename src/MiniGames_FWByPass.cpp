@@ -109,20 +109,20 @@ bool FWByPass::Play() {
     int seconds_left = time_limit_ - int(std::chrono::duration_cast<std::chrono::seconds>(time_now - time_start).count());
 
     if (seconds_left <= 0) {
-        std::cout << "Время вышло!" << std::endl;
+        std::cout << "Время вышло!" << '\n';
         break;
     }
 
     Utils::ClearScreen();
     std::cout << "Осталось ходов: " << (max_moves_ - moves)
-              << "   Времени: " << seconds_left << " сек." << std::endl;
+              << "   Времени: " << seconds_left << " сек." << '\n';
     PrintMaze();
 
     std::cout << "Твой ход (WASD): ";
 
     char ch = _getch();
 
-    std::cout << ch << std::endl;
+    std::cout << ch << '\n';
 
     if (MovePlayer(ch)) {
         ++moves;
