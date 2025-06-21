@@ -130,7 +130,7 @@ else if (awaiting_accept_reject_) {
             if (mail_entry) {
                 player_.Moral()->Add(mail_entry->consequence_bad);
                 mail_.RejectMail(selected_mail_id_);
-                EchoAI::Instance().OnFail("Письмо отклонено. Моральный диссидент уменьшен.");
+                EchoAI::Instance().OnFail("Письмо отклонено."); //todo: MoralDecedent +-
             }
         }
         selected_mail_id_ = -1;
@@ -139,8 +139,6 @@ else if (awaiting_accept_reject_) {
     } else if (cmd == "/cancel") {
         awaiting_accept_reject_ = false;
         selected_mail_id_ = -1;
-        ShowMail(); // просто возвращает к выбору писем, ничего не меняет
-        return;
     } else {
       std::cout << "Введите y/n или /cancel\n";
       return;
