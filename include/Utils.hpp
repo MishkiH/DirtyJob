@@ -6,6 +6,7 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <conio.h>
 
 namespace Utils {
 
@@ -14,16 +15,24 @@ std::string Color(const std::string& text, const std::string& color);
 
 }
 
-// Печать текста по словам (с задержкой между словами)
 inline void PrintSlowlyByChar(const std::string& text, unsigned ms = 30) {
+    bool skip = false;
     for (char ch : text) {
+        if (!skip && _kbhit()) {             // если нажата клавиша
+            char c = _getch();
+            if (c == '\r' || c == '\n') {   // если это Enter
+                skip = true;
+            }
+        }
         std::cout << ch << std::flush;
-        if (ch == '\n')
-            std::this_thread::sleep_for(std::chrono::milliseconds(ms * 4)); // задержка больше для новой строки
-        else if (ch == ' ')
-            std::this_thread::sleep_for(std::chrono::milliseconds(ms));     // чуть медленнее на пробелах
-        else
-            std::this_thread::sleep_for(std::chrono::milliseconds(ms / 2)); // обычная задержка
+        if (!skip) {
+            if (ch == '\n')
+                std::this_thread::sleep_for(std::chrono::milliseconds(ms * 4));
+            else if (ch == ' ')
+                std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(ms / 2));
+        }
     }
     std::cout << '\n';
 }

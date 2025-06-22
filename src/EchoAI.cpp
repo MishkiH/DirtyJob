@@ -14,7 +14,7 @@ EchoAI::EchoAI() : rng_(std::random_device{}()) {
       "Ну и что, теперь будешь этим гордиться?",
       "Серьёзно? Это ты хочешь опубликовать?",
       "Думаешь, это кого-то впечатлит?",
-      "Твой дневник плачет кровавыми слезами."
+      "Смотри не зазнайся."
   };
 }
 
@@ -47,15 +47,16 @@ void EchoAI::OnMiniGameEnd(bool success) {
 }
 
 void EchoAI::PrintHelp() {
-  std::cout << EchoStyle("[Echo][HELP]: ") << "Доступные команды: /switch, /switch_ls, /take {num}, /buy {ID}, /use {ID}, /mystats, /shop, /diary, /mail, /help\n";
+  std::cout << EchoStyle("[Echo][HELP]: ") << "Доступные команды: \n/switch {id} - переключиться на локацию {id}, \n/switch_ls - догадаешься, \n/mystats - вывод статистики, \n/use {name} - применить предмет {name} из инвентаря\n";
 }
 
 void EchoAI::RemindCommand(const std::string& cmd) {
-  std::cout << EchoStyle("[Echo]: ") << "Ты забыл про команду: " << cmd << ". Не удивительно.\n";
+  std::cout << EchoStyle("[Echo]: ") << "Ты забыл про команду: " << cmd << ". Кто бы сомневался.\n";
 }
 
 void EchoAI::PrintWelcome() {
-  std::cout << EchoStyle("[Echo]: ") << "Добро пожаловать в грязную работу. Я — Echo. Привыкай, мы теперь вместе надолго.\n";
+  std::cout << EchoStyle("[Echo]: ") << "Уважаемый пользователь! Вас приветствует нелегальное программное обеспечение “Хакерский Аудит Систем Кибербезопасности” - NPO HaskOS v3.12. Я Ваш личный помощник: AI-ассистент Echo! Будем знакомы.\n";
+  std::cout << EchoStyle("[Echo}: ") << "Кстати. Ты мне уже не нравишься. Чтоб перестать быть невдуплёнышем и начать делать \"полезные\" дела, жмай /help.\n";
 }
 
 void EchoAI::OnBuy(const std::string& item_id) {

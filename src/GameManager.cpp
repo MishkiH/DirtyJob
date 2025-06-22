@@ -62,7 +62,12 @@ if (intro && !intro->published) {
     ShowPrompt();
     std::string line;
     std::getline(std::cin, line);
-    if (line == "/exit") break;
+    if (line == "/exit") {
+      current_ws_ = Workspace::Main;
+      current_ws_id_ = ws_ids_[Workspace::Main];
+      ShowMain();
+      continue;
+    }
     if (line.empty()) continue;
     HandleCommand(line);
   }
@@ -97,26 +102,8 @@ void GameManager::HandleCommand(const std::string& cmd) {
   else if (token == "/switch_ls") {
     ListWorkspaces();
   }
-  else if (token == "/mail") {
-    ShowMail();
-  }
-  else if (token == "/diary") {
-    ShowDiary();
-  }
-  else if (token == "/shop") {
-    ShowShop();
-  }
-  else if (token == "/main") {
-    ShowMain();
-  }
   else if (token == "/mystats") {
     ShowStats();
-  }
-  else if (token == "/take") {
-    int num;
-    iss >> num;
-    if (num >= 1) StartMissionByID(num);
-    else EchoAI::Instance().OnFail("Не указан номер письма");
   }
   else if (token == "/select") {
     int id;
@@ -161,6 +148,7 @@ else if (awaiting_accept_reject_) {
     } else if (cmd == "/cancel") {
         awaiting_accept_reject_ = false;
         selected_mail_id_ = -1;
+        ShowMail();
     } else {
       std::cout << "Введите y/n или /cancel\n";
       return;
@@ -194,11 +182,13 @@ else if (awaiting_accept_reject_) {
 }
 
 void GameManager::ListWorkspaces() const {
+  Utils::ClearScreen();
   std::cout << "Доступные рабочие пространства:\n";
   std::cout << "mail:   " << ws_ids_.at(Workspace::Mail) << "\n";
   std::cout << "diary:  " << ws_ids_.at(Workspace::Diary) << "\n";
   std::cout << "shop:   " << ws_ids_.at(Workspace::Shop) << "\n";
   std::cout << "main:   " << ws_ids_.at(Workspace::Main) << "\n";
+  std::cout << "Напоминалочка: /switch {id} - для перемещения.\n";
 }
 
 GameManager::Workspace GameManager::WorkspaceById(const std::string& id) const {
@@ -210,18 +200,28 @@ GameManager::Workspace GameManager::WorkspaceById(const std::string& id) const {
 void GameManager::ShowMail() {
   Utils::ClearScreen();
   mail_.ShowInbox();
+  std::cout << Utils::Color("Доступные команды: /select {id} - выбор конкретного письма, /exit - выход в главное меню\n", "cyan");
 }
 
 void GameManager::ShowDiary() {
+  Utils::ClearScreen();
   diary_.Show();
+  std::cout << Utils::Color("Доступные команды: /select {id} - перечитать мою записьм, /exit - выход в главное меню\n", "cyan");
 }
 
 void GameManager::ShowShop() {
+  Utils::ClearScreen();
   shop_.Show();
+  std::cout << Utils::Color("Доступные команды: /buy {name} - приобрести предмет, /exit - выход в главное меню\n", "cyan");
+
 }
 
 void GameManager::ShowMain() {
-  std::cout << Utils::Color("Твоё рабочее место. /switch_ls — список пространств, /mail, /diary, /shop — переходы. /mystats — параметры игрока.\n", "blue");
+  Utils::ClearScreen();
+  std::cout << Utils::Color("Святая всех святых: твоё рабочее место.\n", "blue");
+  std::cout << Utils::Color("[Представьте фото котёнка в корзинке, на фоне растёт зелёный лужок. это ваши обои]\n", "green");
+  std::cout << Utils::Color("Доступные команды: /switch_ls, /switch {id}, /mystats, /exit\n", "blue");
+  std::cout << Utils::Color(EchoAI::Instance().SarcasticRemark() + "\n", "magenta");
 }
 
 void GameManager::ShowStats() {
@@ -243,13 +243,13 @@ void GameManager::StartMissionByID(int mail_id) {
 
   // Выбор мини-игры по сценарию
   bool success = false;
-  if (mail_entry->id == 1) { // Пример для первой миссии
+  if (mail_entry->id == 1 || mail_entry->id == 2) { // Пример для первой миссии
     current_mini_game_ = std::make_unique<FWByPass>("../MiniGames/fwby_maze.json");
     success = current_mini_game_->Play();
-  } else if (mail_entry->id == 2) {
+  } else if (mail_entry->id == 3 || mail_entry->id == 4) {
     current_mini_game_ = std::make_unique<BruteForcer>();
     success = current_mini_game_->Play();
-  } else if (mail_entry->id == 3) {
+  } else if (mail_entry->id == 5) {
     current_mini_game_ = std::make_unique<ProtocolSimon>();
     success = current_mini_game_->Play();
   } else {
@@ -258,40 +258,39 @@ void GameManager::StartMissionByID(int mail_id) {
   }
 
 if (success) {
+    mail_entry->finished = true;
+    mail_.RejectOtherMailsInCurrentWave(mail_entry->id);
     EchoAI::Instance().OnSuccess(mail_entry->subject);
     player_.Inventory()->AddItem("ETH", mail_entry->reward); // Выдаём награду
     auto* moral = player_.Moral();
     if (moral)
         moral->Add(mail_entry->good ? mail_entry->consequence_good : mail_entry->consequence_bad);
-    EchoAI::Instance().DiaryNote();
 
-    const auto& entries = diary_.Entries();
-    int found_num = 0;
-    for (size_t i = 0; i < entries.size(); ++i) {
-        const auto& entry = entries[i];
-        if (entry.mission_id && *entry.mission_id == mail_entry->id && !entry.published) {
-            ++found_num;
-            // если good — первый вариант, если bad — второй (по порядку в json!)
-            bool select_this = (mail_entry->good && found_num == 1) || (!mail_entry->good && found_num == 2);
-            if (select_this) {
-                std::cout << "\033[35mЗапись №" << entry.id + 1 << ". Конспект.\n";
-                std::cout << "\"" << entry.title << "\"\033[0m\n\n";
-                PrintSlowlyByChar(entry.text);
-                std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
-                char ans;
-                std::cin >> ans;
-                if (ans == 'Y' || ans == 'y') {
-                    DiaryEntry* pub = diary_.FindById(entry.id);
-                    if (pub) {
-                        pub->published = true;
-                        auto* moral = player_.Moral();
-                        if (moral) moral->Add(pub->moral_effect);
-                    }
-                }
-                break; // выходим, обработав только одну подходящую запись!
-            }
+const DiaryEntry* found_entry = nullptr;
+for (const auto& entry : diary_.Entries()) {
+    if (entry.id == mail_entry->id && !entry.published) {
+        found_entry = &entry;
+        break;
+    }
+}
+if (found_entry) {
+    std::cout << "\033[35mЗапись №" << std::to_string(*found_entry->mission_id) << ". Конспект.\n";
+    std::cout << "\"" << found_entry->title << "\"\033[0m\n\n";
+    PrintSlowlyByChar(found_entry->text);
+    EchoAI::Instance().DiaryNote();
+    std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
+    char ans;
+    std::cin >> ans;
+    if (ans == 'Y' || ans == 'y') {
+        DiaryEntry* pub = diary_.FindById(found_entry->id);
+        if (pub) {
+            pub->published = true;
+            auto* moral = player_.Moral();
+            if (moral) moral->Add(pub->moral_effect);
         }
     }
+    ShowMain();
+  }
 } else {
     auto* health = player_.Health();
     if (health) {

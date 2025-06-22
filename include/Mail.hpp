@@ -27,8 +27,11 @@ class Mail {
   MailEntry* GetMailByID(int num);
   void RejectMail(int id);
   MailEntry* Take(int num); // Берём задание, помечаем taken
+  void RejectOtherMailsInCurrentWave(int except_id);
 
   int Count() const { return static_cast<int>(mails_.size()); }
+  int CurrentWave() const;
+  std::vector<const MailEntry*> GetAvailableMails() const;
 
  private:
   std::vector<MailEntry> mails_;
