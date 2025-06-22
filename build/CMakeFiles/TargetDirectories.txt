@@ -1,0 +1,3 @@
+D:/visual studio c++/DirtyJob/build/CMakeFiles/DirtyJob.dir
+D:/visual studio c++/DirtyJob/build/CMakeFiles/ALL_BUILD.dir
+D:/visual studio c++/DirtyJob/build/CMakeFiles/ZERO_CHECK.dir

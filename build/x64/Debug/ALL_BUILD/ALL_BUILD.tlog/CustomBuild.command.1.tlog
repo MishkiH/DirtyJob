@@ -1,0 +1,10 @@
+^D:\VISUAL STUDIO C++\DIRTYJOB\CMAKELISTS.TXT
+setlocal
+"D:\visual studio c++\cmake\bin\cmake.exe" "-SD:/visual studio c++/DirtyJob" "-BD:/visual studio c++/DirtyJob/build" --check-stamp-file "D:/visual studio c++/DirtyJob/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

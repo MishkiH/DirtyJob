@@ -47,7 +47,7 @@ void EchoAI::OnMiniGameEnd(bool success) {
 }
 
 void EchoAI::PrintHelp() {
-  std::cout << EchoStyle("[Echo][HELP]: ") << "Доступные команды: /switch, /switch_ls, /take {num}, /use {ID}, /mystats, /shop, /diary, /mail, /help\n";
+  std::cout << EchoStyle("[Echo][HELP]: ") << "Доступные команды: /switch, /switch_ls, /take {num}, /buy {ID}, /use {ID}, /mystats, /shop, /diary, /mail, /help\n";
 }
 
 void EchoAI::RemindCommand(const std::string& cmd) {

@@ -175,6 +175,15 @@ else if (awaiting_accept_reject_) {
     }
     shop_.ApplyItem(player_, item_id);
   }
+  else if (token == "/buy") {
+      std::string item_id;
+      iss >> item_id;
+      if (item_id.empty()) {
+          EchoAI::Instance().OnFail("Укажи ID предмета.");
+          return;
+      }
+      shop_.Buy(player_, item_id);
+  }
   else if (token == "/help") {
     EchoAI::Instance().PrintHelp();
   }
