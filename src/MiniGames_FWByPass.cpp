@@ -1,139 +1,175 @@
 #include "MiniGames_FWByPass.hpp"
 #include "EchoAI.hpp"
-#include "../extern/nlohmann/json.hpp"
 #include "Utils.hpp"
+#include "../extern/nlohmann/json.hpp"
 #include <iostream>
 #include <fstream>
 #include <random>
 #include <chrono>
 #include <thread>
 #include <conio.h>
+#include <atomic>
 
 using json = nlohmann::json;
 
 FWByPass::FWByPass(const std::string& maze_file)
-    : rows_(0), cols_(0), player_x_(0), player_y_(0), exit_x_(0), exit_y_(0) {
-  LoadRandomMaze(maze_file);
-}
-
-void FWByPass::LoadRandomMaze(const std::string& maze_file) {
-  std::ifstream file(maze_file);
-  if (!file) {
-    EchoAI::Instance().OnFail("Ошибка загрузки лабиринта");
-    return;
-  }
-  json j;
-  file >> j;
-  // Случайный выбор лабиринта
-  int maze_count = static_cast<int>(j.size());
-  if (maze_count == 0) return;
-  int idx = std::random_device{}() % maze_count;
-  const auto& maze_obj = j[idx];
-
-  max_moves_ = maze_obj.value("max_moves", 30);     // <- значение из json или 30
-  time_limit_ = maze_obj.value("time_limit", 60);   // <- значение из json или 60
-
-  const auto& maze_json = j[idx]["maze"];
-  rows_ = static_cast<int>(maze_json.size());
-  cols_ = static_cast<int>(maze_json[0].get<std::string>().size());
-
-  maze_.clear();
-  for (int y = 0; y < rows_; ++y) {
-    std::string line = maze_json[y];
-    std::vector<MazeCell> row;
-    for (int x = 0; x < cols_; ++x) {
-      char c = line[x];
-      row.push_back({c});
-      if (c == 'S') { player_x_ = x; player_y_ = y; }
-      if (c == 'E') { exit_x_ = x; exit_y_ = y; }
-    }
-    maze_.push_back(row);
-  }
-}
+    : maze_file_(maze_file), rows_(0), cols_(0), player_x_(0), player_y_(0), exit_x_(0), exit_y_(0) {}
 
 void FWByPass::PrintMaze() const {
-  DrawBorder();
-  for (int y = 0; y < rows_; ++y) {
-    std::cout << "|";
-    for (int x = 0; x < cols_; ++x) {
-      if (x == player_x_ && y == player_y_) {
-        std::cout << "\033[32m@\033[0m";  // игрок
-      } else if (maze_[y][x].symbol == '#') {
-        std::cout << "\033[37m#\033[0m";
-      } else if (maze_[y][x].symbol == 'E') {
-        std::cout << "\033[31mE\033[0m";
-      } else if (maze_[y][x].symbol == 'S') {
-        std::cout << "S";
-      } else {
-        std::cout << " ";
-      }
+    DrawBorder();
+    for (int y = 0; y < rows_; ++y) {
+        std::cout << "|";
+        for (int x = 0; x < cols_; ++x) {
+            if (x == player_x_ && y == player_y_) {
+                std::cout << "\033[32m@\033[0m";
+            }
+            else if (maze_[y][x].symbol == '#') {
+                std::cout << "\033[37m#\033[0m";
+            }
+            else if (maze_[y][x].symbol == 'E') {
+                std::cout << "\033[31mE\033[0m";
+            }
+            else if (maze_[y][x].symbol == 'S') {
+                std::cout << "S";
+            }
+            else {
+                std::cout << " ";
+            }
+        }
+        std::cout << "|\n";
     }
-    std::cout << "|\n";
-  }
-  DrawBorder();
+    DrawBorder();
 }
 
 void FWByPass::DrawBorder() const {
-  std::cout << "+";
-  for (int i = 0; i < cols_; ++i) std::cout << "-";
-  std::cout << "+\n";
+    std::cout << "+";
+    for (int i = 0; i < cols_; ++i) std::cout << "-";
+    std::cout << "+\n";
 }
 
 bool FWByPass::MovePlayer(char dir) {
-  int nx = player_x_, ny = player_y_;
-  switch (dir) {
+    int nx = player_x_, ny = player_y_;
+    switch (dir) {
     case 'w': --ny; break;
     case 'a': --nx; break;
     case 's': ++ny; break;
     case 'd': ++nx; break;
     default: return false;
-  }
-  if (nx < 0 || ny < 0 || nx >= cols_ || ny >= rows_) return false;
-  if (maze_[ny][nx].symbol == '#') return false;
-  player_x_ = nx; player_y_ = ny;
-  return true;
+    }
+    if (nx < 0 || ny < 0 || nx >= cols_ || ny >= rows_) return false;
+    if (maze_[ny][nx].symbol == '#') return false;
+    player_x_ = nx; player_y_ = ny;
+    return true;
 }
 
-// Логика самой мини-игры (упрощённая, без фаз зоны)
 bool FWByPass::Play() {
-  EchoAI::Instance().OnMiniGameStart(Name());
-  auto time_start = std::chrono::steady_clock::now();
-  bool win = false;
-  int max_moves = 30;
-  int moves = 0;
-  PrintMaze();
-  std::cout << "Управление: WASD. Выйди к E (exit). Ограничение по ходам!\n";
-  while (moves < max_moves_) {
-    // вычисляем оставшееся время на каждой итерации
-    auto time_now = std::chrono::steady_clock::now();
-    int seconds_left = time_limit_ - int(std::chrono::duration_cast<std::chrono::seconds>(time_now - time_start).count());
+    EchoAI::Instance().OnMiniGameStart(Name());
+    bool overall_win = true;
+    const int total_levels = 3;
 
-    if (seconds_left <= 0) {
-        std::cout << "Время вышло!" << '\n';
-        break;
+    std::ifstream file(maze_file_);
+    if (!file) {
+        EchoAI::Instance().OnFail("Не удалось загрузить файл лабиринтов");
+        return false;
+    }
+    json all_mazes;
+    file >> all_mazes;
+
+    if (all_mazes.size() < total_levels) {
+        EchoAI::Instance().OnFail("Недостаточно уровней в JSON");
+        return false;
     }
 
-    Utils::ClearScreen();
-    std::cout << "Осталось ходов: " << (max_moves_ - moves)
-              << "   Времени: " << seconds_left << " сек." << '\n';
-    PrintMaze();
+    for (int level = 0; level < total_levels; ++level) {
+        const auto& maze_obj = all_mazes[level];
+        max_moves_ = maze_obj.value("max_moves", 30);
+        time_limit_ = maze_obj.value("time_limit", 60);
+        const auto& maze_json = maze_obj["maze"];
 
-    std::cout << "Твой ход (WASD): ";
+        rows_ = static_cast<int>(maze_json.size());
+        cols_ = static_cast<int>(maze_json[0].get<std::string>().size());
 
-    char ch = _getch();
+        maze_.clear();
+        for (int y = 0; y < rows_; ++y) {
+            std::string line = maze_json[y];
+            std::vector<MazeCell> row;
+            for (int x = 0; x < cols_; ++x) {
+                char c = line[x];
+                row.push_back({ c });
+                if (c == 'S') { player_x_ = x; player_y_ = y; }
+                if (c == 'E') { exit_x_ = x; exit_y_ = y; }
+            }
+            maze_.push_back(row);
+        }
 
-    std::cout << ch << '\n';
+        int moves = 0;
+        std::atomic<int> seconds_left(time_limit_);
+        std::atomic<bool> running(true);
+        bool win = false;
 
-    if (MovePlayer(ch)) {
-        ++moves;
-        if (player_x_ == exit_x_ && player_y_ == exit_y_) {
-            win = true;
+        Utils::ClearScreen();
+        std::cout << "Уровень " << (level + 1) << " из " << total_levels << "\n";
+        std::cout << "Осталось ходов: " << (max_moves_ - moves)
+            << "   Времени: " << seconds_left << " сек.\n";
+        PrintMaze();
+        std::cout << "Твой ход (WASD):\n";
+
+        std::thread timer_thread([&]() {
+            while (running && seconds_left > 0) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                --seconds_left;
+                std::cout << "\033[2;1H";
+                std::cout << "Осталось ходов: " << (max_moves_ - moves)
+                    << "   Времени: " << seconds_left << " сек.   \n";
+                std::cout.flush();
+            }
+            running = false;
+            });
+
+        while (running) {
+            if (_kbhit()) {
+                char ch = _getch();
+                if (MovePlayer(ch)) {
+                    ++moves;
+                    if (player_x_ == exit_x_ && player_y_ == exit_y_) {
+                        win = true;
+                        running = false;
+                    }
+                }
+                else {
+                    EchoAI::Instance().OnFail("Ход невозможен");
+                }
+
+                Utils::ClearScreen();
+                std::cout << "Уровень " << (level + 1) << " из " << total_levels << "\n";
+                std::cout << "Осталось ходов: " << (max_moves_ - moves)
+                    << "   Времени: " << seconds_left << " сек.\n";
+                PrintMaze();
+                std::cout << "Твой ход (WASD):\n";
+
+                if (moves >= max_moves_) {
+                    running = false;
+                }
+            }
+        }
+
+        if (timer_thread.joinable()) timer_thread.join();
+
+        Utils::ClearScreen();
+        if (!win) {
+            if (seconds_left <= 0)
+                std::cout << "Время вышло!\n";
+            else
+                std::cout << "Ходы закончились!\n";
+            overall_win = false;
             break;
         }
-    } else {
-        EchoAI::Instance().OnFail("Ход невозможен");
+        else {
+            std::cout << "Уровень " << (level + 1) << " пройден!\n";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
     }
-}
-  EchoAI::Instance().OnMiniGameEnd(win);
-  return win;
+
+    EchoAI::Instance().OnMiniGameEnd(overall_win);
+    return overall_win;
 }
