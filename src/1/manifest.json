@@ -1,0 +1,8 @@
+{
+    "namespace": "BepInEx",
+    "name": "BepInExPack_PEAK",
+    "version_number": "5.4.2403",
+    "website_url": "https://github.com/BepInEx/BepInEx",
+    "description": "BepInEx pack for PEAK. Preconfigured and ready to use.",
+    "dependencies": []
+}
