@@ -57,6 +57,10 @@ class GameManager {
 
   // Обработка заказов, запуск мини-игр, и применение их результатов
   void StartMissionByID(int mail_id);
+  void ShowDiaryEntry(const DiaryEntry& entry);
+  void ShowDiaryEntryAndEnd(const DiaryEntry& entry);
+  void ShowMail5Choice();
+  bool awaiting_mail5_choice_ = false;
 
   // Служебные
   void ListWorkspaces() const;

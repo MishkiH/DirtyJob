@@ -21,7 +21,7 @@ inline void PrintSlowlyByChar(const std::string& text, unsigned ms = 30) {
         if (!skip && _kbhit()) {             // если нажата клавиша
             char c = _getch();
             if (c == '\r' || c == '\n') {   // если это Enter
-                skip = true;
+                skip = true; 
             }
         }
         std::cout << ch << std::flush;

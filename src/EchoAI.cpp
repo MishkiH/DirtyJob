@@ -1,5 +1,8 @@
 #include "EchoAI.hpp"
+#include "Utils.hpp"
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 EchoAI::EchoAI() : rng_(std::random_device{}()) {
   sarcastic_ = {
@@ -24,7 +27,10 @@ EchoAI& EchoAI::Instance() {
 }
 
 void EchoAI::OnPlayerAction(const std::string& action) {
-  std::cout << EchoStyle("[Echo]: ") << "Ты попытался: " << action << ". Ну-ну.\n";
+  std::cout << EchoStyle("[Echo]: ") << "Ты попытался. " << action << ". Ну-ну. Удачи\n";
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  Utils::ClearScreen();
+
 }
 
 void EchoAI::OnFail(const std::string& reason) {
@@ -33,6 +39,8 @@ void EchoAI::OnFail(const std::string& reason) {
 
 void EchoAI::OnSuccess(const std::string& context) {
   std::cout << EchoStyle("[Echo]: ") << "У тебя получилось: " << context << ". Чудо!\n";
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  Utils::ClearScreen();
 }
 
 void EchoAI::OnMiniGameStart(const std::string& name) {
@@ -56,7 +64,8 @@ void EchoAI::RemindCommand(const std::string& cmd) {
 
 void EchoAI::PrintWelcome() {
   std::cout << EchoStyle("[Echo]: ") << "Уважаемый пользователь! Вас приветствует нелегальное программное обеспечение “Хакерский Аудит Систем Кибербезопасности” - NPO HaskOS v3.12. Я Ваш личный помощник: AI-ассистент Echo! Будем знакомы.\n";
-  std::cout << EchoStyle("[Echo}: ") << "Кстати. Ты мне уже не нравишься. Чтоб перестать быть невдуплёнышем и начать делать \"полезные\" дела, жмай /help.\n";
+  std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+  std::cout << EchoStyle("[Echo}: ") << "Кстати. Ты мне уже не нравишься.\n";
 }
 
 void EchoAI::OnBuy(const std::string& item_id) {
