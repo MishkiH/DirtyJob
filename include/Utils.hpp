@@ -18,7 +18,7 @@ std::string Color(const std::string& text, const std::string& color);
 inline void PrintSlowlyByChar(const std::string& text, unsigned ms = 30) {
     bool skip = false;
     for (char ch : text) {
-        if (!skip && _kbhit()) {             // если нажата клавиша
+        if (!skip && _kbhit()) {            // если нажата клавиша
             char c = _getch();
             if (c == '\r' || c == '\n') {   // если это Enter
                 skip = true; 

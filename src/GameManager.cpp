@@ -295,50 +295,6 @@ void GameManager::StartMissionByID(int mail_id) {
     EchoAI::Instance().OnPlayerAction("Принятие заказа: " + mail_entry->subject);
 
     // спецлогика для письма №5
-    if (mail_entry->id == 5) {
-        int moral_lvl = player_.Moral()->GetValue();
-        bool can_refuse = (moral_lvl > -10);
-        bool can_accept = (moral_lvl < 10);
-
-        std::string reason_refuse, reason_accept;
-        if (!can_refuse)
-            reason_refuse = "Уровень морального диссидента слишком низок для отказа от грязной работы.";
-        if (!can_accept)
-            reason_accept = "Уровень морального диссидента слишком высок для принятия грязного заказа.";
-
-        Utils::ClearScreen();
-        std::cout << (can_refuse ? "\033[32m" : "\033[90m") << "[1] Отказаться от грязной работы (хорошая концовка)\033[0m\n";
-        if (!can_refuse) std::cout << "\033[90mПричина: " << reason_refuse << "\033[0m\n";
-        std::cout << (can_accept ? "\033[31m" : "\033[90m") << "[2] Принять грязный заказ (плохая концовка)\033[0m\n";
-        if (!can_accept) std::cout << "\033[90mПричина: " << reason_accept << "\033[0m\n";
-        std::cout << "Моральный диссидент: " << moral_lvl << "\n";
-
-        int choice = 0;
-        while (true) {
-            std::cout << "Выберите вариант (1/2): ";
-            std::cin >> choice;
-            if ((choice == 1 && can_refuse) || (choice == 2 && can_accept)) break;
-            std::cout << "Вариант недоступен!\n";
-        }
-
-        if (choice == 1) {
-            // GOOD END: дневник 6
-            const DiaryEntry* found_entry = diary_.FindById(6);
-            if (found_entry) {
-                ShowDiaryEntryAndEnd(*found_entry);
-            }
-        } else {
-            // BAD END: запуск бесконечной мини-игры и проигрыш
-            current_mini_game_ = std::make_unique<ProtocolSimon>();
-            bool success = current_mini_game_->Play();
-            // успех невозможен, но оставим для порядка:
-            const DiaryEntry* found_entry = diary_.FindById(5);
-            if (found_entry) {
-                ShowDiaryEntryAndEnd(*found_entry);
-            }
-        }
-        std::exit(0);
-    }
 
     // обычные письма писем
     bool success = false;
@@ -412,7 +368,7 @@ void GameManager::ShowDiaryEntry(const DiaryEntry& entry) {
     std::cout << "\"" << entry.title << "\"\033[0m\n\n";
     PrintSlowlyByChar(entry.text);
     EchoAI::Instance().DiaryNote();
-    std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
+    std::cout << "\nY[Опубликовать] | N[Удалить] : ";
     char ans;
     std::cin >> ans;
     auto* moral = player_.Moral();
@@ -428,7 +384,8 @@ void GameManager::ShowDiaryEntry(const DiaryEntry& entry) {
 
 void GameManager::ShowDiaryEntryAndEnd(const DiaryEntry& entry) {
     ShowDiaryEntry(entry);
-    std::cout << "\n\033[36mTo be continued..\033[0m\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(600));
+    std::cout << "\n\n\033[36mTo be continued..\033[0m\n";
     std::cin.ignore();
     std::cin.get();
 }
