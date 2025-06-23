@@ -288,7 +288,10 @@ void GameManager::ShowStats() {
 void GameManager::StartMissionByID(int mail_id) {
     MailEntry* mail_entry = mail_.GetMailByID(mail_id);
     if (!mail_entry) {
+<<<<<<< HEAD
         current_mini_game_ = std::make_unique<FWByPass>("MiniGames/fwby_maze.json", player_);
+=======
+>>>>>>> e63cd5999c7d5153852048af49b10ec1c75fcac1
         EchoAI::Instance().OnFail("Письма с таким ID нет");
         return;
     }
@@ -300,7 +303,11 @@ void GameManager::StartMissionByID(int mail_id) {
     // обычные письма писем
     bool success = false;
     if (mail_entry->id == 1 || mail_entry->id == 2) {
+<<<<<<< HEAD
         current_mini_game_ = std::make_unique<FWByPass>("../MiniGames/fwby_maze.json", player_);
+=======
+        current_mini_game_ = std::make_unique<FWByPass>("../MiniGames/fwby_maze.json");
+>>>>>>> e63cd5999c7d5153852048af49b10ec1c75fcac1
         success = current_mini_game_->Play();
     } else if (mail_entry->id == 3 || mail_entry->id == 4) {
         current_mini_game_ = std::make_unique<BruteForcer>();

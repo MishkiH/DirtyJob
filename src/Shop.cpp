@@ -96,7 +96,11 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
   } else if (item_id == "coffee") {
     EchoAI::Instance().OnSuccess("Coffee.exe принят. Станешь внимательнее (на время).");
     player.Inventory()->RemoveItem(item_id);
+<<<<<<< HEAD
     player.ActivateCoffee();
+=======
+    // Coffee активируется на следующей миссии
+>>>>>>> e63cd5999c7d5153852048af49b10ec1c75fcac1
   } else {
     EchoAI::Instance().OnFail("Этот предмет неактивируемый.");
   }
