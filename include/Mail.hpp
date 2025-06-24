@@ -10,7 +10,7 @@ struct MailEntry {
   std::string subject;
   std::string sender;
   std::string content;
-  bool good;        // Гуманное задание
+  bool good; // гуманное задание
   int consequence_good;
   int consequence_bad;
   int reward = 0;
@@ -26,7 +26,7 @@ class Mail {
   void ShowInbox() const;
   MailEntry* GetMailByID(int num);
   void RejectMail(int id);
-  MailEntry* Take(int num); // Берём задание, помечаем taken
+  MailEntry* Take(int num); // берём задание, помечаем taken
   void RejectOtherMailsInCurrentWave(int except_id);
 
   int Count() const { return static_cast<int>(mails_.size()); }

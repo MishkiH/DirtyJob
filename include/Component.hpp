@@ -7,7 +7,7 @@ class Component {
  public:
   virtual ~Component() = default;
 
-  // Каждый компонент должен иметь уникальный строковый id для регистрации.
+  // каждый компонент должен иметь уникальный строковый id для регистрации.
   virtual std::string GetID() const = 0;
 };
 

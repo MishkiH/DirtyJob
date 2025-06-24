@@ -5,7 +5,7 @@
 
 class HealthComponent : public Component {
  public:
-  HealthComponent(int initial_hp = 3) : max_hp_(initial_hp), hp_(initial_hp) {}
+  HealthComponent(int initial_hp = 2) : max_hp_(initial_hp), hp_(initial_hp) {}
   ~HealthComponent() override = default;
 
   std::string GetID() const override { return "HealthComponent"; }

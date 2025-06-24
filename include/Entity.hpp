@@ -13,13 +13,13 @@ class Entity {
   Entity() = default;
   ~Entity() = default;
 
-  // Добавить компонент к сущности (владеем через unique_ptr)
+  // добавить компонент к сущности (владеем через unique_ptr)
   template <typename T>
   void AddComponent(std::unique_ptr<T> component) {
     components_[std::type_index(typeid(T))] = std::move(component);
   }
 
-  // Получить компонент, если он есть (nullptr если нет)
+  // получить компонент если он есть (nullptr если нет)
   template <typename T>
   T* GetComponent() {
     auto it = components_.find(std::type_index(typeid(T)));
@@ -29,7 +29,7 @@ class Entity {
     return nullptr;
   }
 
-  // Удалить компонент
+  // удалить компонент
   template <typename T>
   void RemoveComponent() {
     components_.erase(std::type_index(typeid(T)));

@@ -90,5 +90,5 @@ std::string EchoAI::GetRandom(const std::vector<std::string>& pool) {
 }
 
 std::string EchoAI::EchoStyle(const std::string& msg) {
-  return "\033[36m" + msg + "\033[0m"; // cyan
+  return Utils::Color(msg, "cyan");
 }

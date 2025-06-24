@@ -5,7 +5,6 @@
 #include <chrono>
 #include <thread>
 
-// Очень упрощённая реализация для заглушки
 bool BruteForcer::Play() {
   EchoAI::Instance().OnMiniGameStart(Name());
   std::string chars = "ABCDEF123456";

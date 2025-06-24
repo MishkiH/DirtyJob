@@ -50,7 +50,6 @@ bool Shop::Buy(Player& player, const std::string& item_id) {
     return false;
   }
 
-  // Пример: деньги у игрока — пока в инвентаре (ETH), позже можно вынести в отдельный компонент
   int eth_count = player.Inventory()->GetCount("ETH");
   if (eth_count < item->price) {
     EchoAI::Instance().OnFail("Недостаточно ETH");
@@ -92,7 +91,7 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
     player.Inventory()->RemoveItem(item_id);
   } else if (item_id == "ghostkey") {
     EchoAI::Instance().OnSuccess("GhostKey готов к использованию для мини-игр взлома.");
-    // GhostKey активируется в мини-играх
+    // GhostKey активируется в мини-играх. todo:: удалить
   } else if (item_id == "coffee") {
     EchoAI::Instance().OnSuccess("Coffee.exe принят. Станешь внимательнее (на время).");
     player.Inventory()->RemoveItem(item_id);

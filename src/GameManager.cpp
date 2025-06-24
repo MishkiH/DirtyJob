@@ -36,7 +36,7 @@ void GameManager::GenerateWorkspaceIds() {
 
 void GameManager::Run() {
   Utils::ClearScreen();
-  // Показываем вступление из дневника (id == 0)
+  //вступление из дневника (id == 0)
 const DiaryEntry* intro = diary_.FindById(0);
 if (intro && !intro->published) {
   Utils::ClearScreen();
@@ -165,7 +165,7 @@ else if (awaiting_mail5_choice_) {
             // BAD END: бесконечная мини-игра и дневник 6
             current_mini_game_ = std::make_unique<ProtocolSimon>();
             bool success = current_mini_game_->Play();
-            (void)success; // успех невозможен
+            (void)success; // не выиграешь ты тут
             const DiaryEntry* found_entry = diary_.FindById(6);
             if (found_entry) {
                 ShowDiaryEntryAndEnd(*found_entry);
@@ -294,7 +294,6 @@ void GameManager::StartMissionByID(int mail_id) {
 
     EchoAI::Instance().OnPlayerAction("Принятие заказа: " + mail_entry->subject);
 
-    // спецлогика для письма №5
 
     // обычные письма писем
     bool success = false;
@@ -324,7 +323,7 @@ void GameManager::StartMissionByID(int mail_id) {
         }
         Utils::ClearScreen();
         ShowMain();
-    } else { // Проигрыш — потеря здоровья и сброс
+    } else { // проигрыш — потеря здоровья и сброс
         auto* health = player_.Health();
         if (health) {
             health->Damage(1);
