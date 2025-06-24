@@ -12,8 +12,11 @@ class HealthComponent : public Component {
 
   int Get() const { return hp_; }
   int Max() const { return max_hp_; }
-  void Damage(int dmg = 1) { hp_ = std::max(0, hp_ - dmg); }
-  void Heal(int amount = 1) { hp_ = std::min(max_hp_, hp_ + amount); }
+  void Damage(int dmg = 1) { hp_ -= dmg; }
+  void Heal(int amount = 1) {
+    (hp_ + amount > max_hp_) ? max_hp_ : hp_ + amount;
+    ;
+  }
   void UpgradeMax(int by = 1) {
     max_hp_ += by;
     hp_ = max_hp_;

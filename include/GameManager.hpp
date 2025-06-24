@@ -25,6 +25,7 @@ class GameManager {
   GameManager();
 
   void Run();
+  static int coffeeGag;
 
  private:
   // рабочие пространства

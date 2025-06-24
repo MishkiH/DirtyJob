@@ -1,8 +1,5 @@
 #include "Shop.hpp"
 
-#include "../extern/nlohmann/json.hpp"
-#include "EchoAI.hpp"
-
 using json = nlohmann::json;
 
 Shop::Shop(const std::string& data_file) { LoadFromFile(data_file); }
@@ -43,7 +40,7 @@ bool Shop::Buy(Player& player, const std::string& item_id) {
 
   int eth_count = player.Inventory()->GetCount("ETH");
   if (eth_count < item->price) {
-    EchoAI::Instance().OnFail("Маловато ETH, понимаешь ли");
+    EchoAI::Instance().OnFail("Маловато ETH, понимаешь ли.");
     return false;
   }
 
@@ -52,12 +49,10 @@ bool Shop::Buy(Player& player, const std::string& item_id) {
 
   EchoAI::Instance().OnBuy(item->name);
 
-  if (item->id == "echo_upgrade") {
-    EchoAI::Instance().RemindCommand("/use EU");
-  } else if (item->id == "ghostkey") {
-    EchoAI::Instance().RemindCommand("/use GK");
+  if (item->id == "kernel_v2") {
+    EchoAI::Instance().RemindCommand("/use kernel_v2");
   } else if (item->id == "coffee") {
-    EchoAI::Instance().RemindCommand("/use CF");
+    EchoAI::Instance().RemindCommand("/use coffee");
   }
 
   return true;

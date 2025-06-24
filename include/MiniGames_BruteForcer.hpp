@@ -6,7 +6,10 @@
 #include <random>
 #include <thread>
 
+#include "EchoAI.hpp"
+#include "GameManager.hpp"
 #include "MiniGame.hpp"
+#include "Utils.hpp"
 
 class BruteForcer : public MiniGame {
  public:

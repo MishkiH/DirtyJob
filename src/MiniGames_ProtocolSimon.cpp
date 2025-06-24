@@ -1,32 +1,25 @@
 #include "MiniGames_ProtocolSimon.hpp"
 
-#include <windows.h>
-
-#include "Utils.hpp"
-
-// ANSI цвет для терминала
-std::string Color(char key) {
-  switch (key) {
-    case 'W':
-      return "\033[1;34m";  // Синий
-    case 'A':
-      return "\033[1;32m";  // Зелёный
-    case 'S':
-      return "\033[1;31m";  // Красный
-    case 'D':
-      return "\033[1;33m";  // Жёлтый
-    default:
-      return "\033[0m";
-  }
-}
-
 void ShowChar(char c) {
   Utils::ClearScreen();
   std::cout << "Смотри внимательно:\n\n";
-  std::cout << Color(c) << c << "\033[0m" << '\n';
-  Utils::SleepFor(600);
+  switch (c) {
+    case 'W':
+      std::cout << Utils::Color(std::string(1, c), "blue");
+      break;
+    case 'A':
+      std::cout << Utils::Color(std::string(1, c), "green");
+      break;
+    case 'S':
+      std::cout << Utils::Color(std::string(1, c), "red");
+      break;
+    case 'D':
+      std::cout << Utils::Color(std::string(1, c), "yellow");
+      break;
+  }
+  Utils::SleepFor(600 * GameManager::coffeeGag);
   Utils::ClearScreen();
-  Utils::SleepFor(300);
+  Utils::SleepFor(300 * GameManager::coffeeGag);
 }
 
 bool ProtocolSimon::Play() {
@@ -37,7 +30,9 @@ bool ProtocolSimon::Play() {
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dist(0, keys.size() - 1);
 
-  std::cout << "=== ProtocolSimon ===\n";
+  Utils::SleepFor(3000);
+  Utils::ClearScreen();
+  std::cout << Utils::Color("=== ProtocolSimon ===\n", "yellow");
   std::cout
       << "Запоминай последовательность мигающих клавиш (WASD) и вводи её! :)\n";
   std::cout << "Игра идёт до.. первой ошибки! АХ-ХА-ХА-ХАА\n";

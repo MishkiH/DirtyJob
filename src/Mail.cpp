@@ -1,8 +1,5 @@
 #include "Mail.hpp"
 
-#include "../extern/nlohmann/json.hpp"
-#include "Utils.hpp"
-
 using json = nlohmann::json;
 
 Mail::Mail(const std::string& data_file) { LoadFromFile(data_file); }

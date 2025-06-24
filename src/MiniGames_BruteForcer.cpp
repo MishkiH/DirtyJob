@@ -1,8 +1,5 @@
 #include "MiniGames_BruteForcer.hpp"
 
-#include "EchoAI.hpp"
-#include "Utils.hpp"
-
 bool BruteForcer::Play() {
   EchoAI::Instance().OnMiniGameStart(Name());
   std::string chars = "ABCDEF123456";
@@ -24,12 +21,12 @@ bool BruteForcer::Play() {
       win = false;
       break;
     }
-    if (elapsed > std::chrono::seconds(10)) {
-      EchoAI::Instance().OnFail("Слишком долго думал.");
+    if (elapsed > std::chrono::seconds(8 * GameManager::coffeeGag)) {
+      EchoAI::Instance().OnFail("Не хочу тебя обижать. Ты тормоз");
       win = false;
       break;
     }
-    std::cout << "Один ключ подобран!\n";
+    std::cout << "Ключ подобран!\n";
   }
   EchoAI::Instance().OnMiniGameEnd(win);
   return win;

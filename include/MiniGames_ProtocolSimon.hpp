@@ -1,6 +1,8 @@
 #ifndef MINIGAMES_PROTOCOLSIMON_HPP_
 #define MINIGAMES_PROTOCOLSIMON_HPP_
 
+#include <windows.h>
+
 #include <cctype>
 #include <chrono>
 #include <cstdlib>
@@ -9,7 +11,9 @@
 #include <thread>
 #include <vector>
 
+#include "GameManager.hpp"
 #include "MiniGame.hpp"
+#include "Utils.hpp"
 
 class ProtocolSimon : public MiniGame {
  public:

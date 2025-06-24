@@ -12,8 +12,11 @@
 #include <thread>
 #include <vector>
 
+#include "../extern/nlohmann/json.hpp"
+#include "EchoAI.hpp"
 #include "MiniGame.hpp"
 #include "Player.hpp"
+#include "Utils.hpp"
 
 class FWByPass : public MiniGame {
  public:

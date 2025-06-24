@@ -6,7 +6,9 @@
 #include <string>
 #include <vector>
 
+#include "../extern/nlohmann/json.hpp"
 #include "Player.hpp"
+#include "Utils.hpp"
 
 struct MailEntry {
   int id;

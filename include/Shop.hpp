@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "../extern/nlohmann/json.hpp"
+#include "EchoAI.hpp"
 #include "Player.hpp"
 
 struct ShopItem {

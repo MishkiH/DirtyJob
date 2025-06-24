@@ -1,7 +1,5 @@
 #include "EchoAI.hpp"
 
-#include "Utils.hpp"
-
 EchoAI::EchoAI() : rng_(std::random_device{}()) {
   sarcastic_ = {"Ой, как оригинально. Никто бы так не сделал.",
                 "Вот это да, ты реально считаешь, что это сработает?",

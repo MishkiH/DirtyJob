@@ -9,6 +9,8 @@ GameManager::GameManager()
   current_ws_id_ = ws_ids_[current_ws_];
 }
 
+int GameManager::coffeeGag = 1;
+
 void GameManager::GenerateWorkspaceIds() {
   std::random_device rd;
   std::mt19937 rng(rd());
@@ -153,10 +155,10 @@ void GameManager::HandleCommand(const std::string& cmd) {
         return;
       }
       Utils::ClearScreen();
-      std::cout << Utils::Color("Запись №" +
-                                    std::to_string(*diary_entry->mission_id) +
-                                    ". Конспект.\n",
-                                "magenta");
+      std::cout << Utils::Color(
+          "Запись №" + std::to_string(*diary_entry->mission_id + 1) +
+              ". Конспект.\n",
+          "magenta");
       std::cout << Utils::Color("\"" + diary_entry->title + "\"\n\n", "yellow");
       Utils::PrintSlowlyByChar(diary_entry->text);
 
@@ -164,10 +166,9 @@ void GameManager::HandleCommand(const std::string& cmd) {
       std::cout << Utils::Color("\nВлияние на морального диссидента: ",
                                 "yellow");
       if (diary_entry->moral_effect > 0) std::cout << "+";
-      std::cout << diary_entry->moral_effect << "\033[0m\n";
+      std::cout << diary_entry->moral_effect << '\n';
       std::cout << Utils::Color("\nНажмите Enter для возврата в дневник...",
                                 "cyan");
-      std::cin.ignore();
       std::cin.get();
       ShowDiary();
       return;
@@ -243,6 +244,11 @@ void GameManager::HandleCommand(const std::string& cmd) {
   } else if (token == "/use") {
     std::string item_id;
     iss >> item_id;
+    if (item_id == "coffee") {
+      coffeeGag = 2;
+      std::cout << EchoAI::EchoStyle("[Echo]: ")
+                << "Coffee.exe принят. Надеюсь, это пойдёт в пользу.\n";
+    }
     if (item_id.empty()) {
       EchoAI::Instance().OnFail("Укажи ID предмета.");
       return;
@@ -266,12 +272,13 @@ void GameManager::HandleCommand(const std::string& cmd) {
 
 void GameManager::ListWorkspaces() const {
   Utils::ClearScreen();
-  std::cout << "Доступные рабочие пространства:\n";
+  std::cout << Utils::Color("Доступные рабочие пространства:\n", "yellow");
   std::cout << "mail:   " << ws_ids_.at(Workspace::Mail) << "\n";
   std::cout << "diary:  " << ws_ids_.at(Workspace::Diary) << "\n";
   std::cout << "shop:   " << ws_ids_.at(Workspace::Shop) << "\n";
   std::cout << "main:   " << ws_ids_.at(Workspace::Main) << "\n";
-  std::cout << "Напоминалочка: /switch {id} - для перемещения.\n";
+  std::cout << EchoAI::EchoStyle("[Echo]: ") +
+                   "Просто напомню: /switch {id} - для перемещения.\n";
 }
 
 GameManager::Workspace GameManager::WorkspaceById(const std::string& id) const {

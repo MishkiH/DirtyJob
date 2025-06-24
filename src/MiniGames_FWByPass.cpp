@@ -1,9 +1,5 @@
 #include "MiniGames_FWByPass.hpp"
 
-#include "../extern/nlohmann/json.hpp"
-#include "EchoAI.hpp"
-#include "Utils.hpp"
-
 using json = nlohmann::json;
 
 FWByPass::FWByPass(const std::string& maze_file)

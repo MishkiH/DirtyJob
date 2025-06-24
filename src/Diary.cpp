@@ -1,7 +1,5 @@
 #include "Diary.hpp"
 
-#include "../extern/nlohmann/json.hpp"
-
 using json = nlohmann::json;
 
 Diary::Diary(const std::string& data_file) { LoadFromFile(data_file); }
@@ -26,7 +24,7 @@ void Diary::LoadFromFile(const std::string& data_file) {
 }
 
 void Diary::Show() const {
-  std::cout << "\033[35m=== Дневник ===\033[0m\n";
+  std::cout << Utils::Color("=== Дневник ===\n", "magenta");
   int num = 1;
   for (const auto& entry : entries_) {
     if (entry.published)

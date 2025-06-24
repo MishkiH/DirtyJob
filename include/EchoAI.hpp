@@ -8,6 +8,8 @@
 #include <thread>
 #include <vector>
 
+#include "Utils.hpp"
+
 class EchoAI {
  public:
   static EchoAI& Instance();

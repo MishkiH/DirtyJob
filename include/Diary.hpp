@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 
+#include "../extern/nlohmann/json.hpp"
+#include "Utils.hpp"
+
 struct DiaryEntry {
   int id;
   std::string title;
