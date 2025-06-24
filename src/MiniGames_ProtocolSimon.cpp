@@ -74,9 +74,9 @@ bool ProtocolSimon::Play() {
         if (!correct) {
             std::cout << "\n Ошибка! Правильная последовательность была: ";
             for (char c : sequence) std::cout << c;
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::this_thread::sleep_for(std::chrono::seconds(4));
             std::cout << Utils::Color("\n[Security System]: ", "red") << "Игры кончились. Наши специалисты уже взялись за тебя. Даже не думай пробовать скрыться. Всё равно найдём ХА-ХА-ХА\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::this_thread::sleep_for(std::chrono::seconds(6));
             Utils::ClearScreen();
             return false;
         }

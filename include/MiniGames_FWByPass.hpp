@@ -2,6 +2,7 @@
 #define MINIGAMES_FW_BYPASS_HPP_
 
 #include "MiniGame.hpp"
+#include "Player.hpp"
 
 #include <string>
 #include <vector>

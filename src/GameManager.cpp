@@ -111,102 +111,133 @@ void GameManager::HandleCommand(const std::string& cmd) {
     ShowStats();
   }
   else if (token == "/select") {
-    int id;
-    iss >> id;
-    MailEntry* mail_entry = mail_.GetMailByID(id);
-    if (!mail_entry) {
-      EchoAI::Instance().OnFail("Письмо не найдено.");
+      int id;
+      iss >> id;
+
+      if (current_ws_ == Workspace::Mail) {
+          MailEntry* mail_entry = mail_.GetMailByID(id);
+          if (!mail_entry) {
+              EchoAI::Instance().OnFail("Письмо не найдено.");
+              return;
+          }
+          selected_mail_id_ = id;
+
+          if (id == 5) {
+              awaiting_mail5_choice_ = true;
+              Utils::ClearScreen();
+              std::cout << "Отправитель: " << mail_entry->sender << '\n';
+              std::cout << "Тема: " << mail_entry->subject << '\n';
+              std::cout << "===========\n";
+              std::cout << mail_entry->content << "\n\n";
+              std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n\n";
+              ShowMail5Choice();
+              return;
+          } else {
+              awaiting_accept_reject_ = true;
+
+              Utils::ClearScreen();
+              std::cout << "Отправитель: " << mail_entry->sender << '\n';
+              std::cout << "Тема: " << mail_entry->subject << '\n';
+              std::cout << "===========\n";
+              std::cout << mail_entry->content << "\n\n";
+              std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n" << '\n';
+              std::cout << "\nДля принятия заказа введите y/n. Для отмены введите /cancel\n";
+              return;
+          }
+      }
+      else if (current_ws_ == Workspace::Diary) {
+          const DiaryEntry* diary_entry = diary_.FindById(id);
+          if (!diary_entry) {
+              EchoAI::Instance().OnFail("Запись не найдена.");
+              return;
+          }
+          Utils::ClearScreen();
+          std::cout << "\033[35mЗапись №" << (diary_entry->mission_id.has_value() ? std::to_string(*diary_entry->mission_id) : "?")
+                    << ". Конспект.\n";
+          std::cout << "\"" << diary_entry->title << "\"\033[0m\n\n";
+          PrintSlowlyByChar(diary_entry->text);
+
+          //влияние на мор.дис
+          std::cout << "\n\033[33mВлияние на морального диссидента: ";
+          if (diary_entry->moral_effect > 0)
+              std::cout << "+";
+          std::cout << diary_entry->moral_effect << "\033[0m\n";
+          std::cout << Utils::Color("\nНажмите Enter для возврата в дневник...", "cyan");
+          std::cin.ignore();
+          std::cin.get();
+          ShowDiary();
+          return;
+      }
+      else {
+          EchoAI::Instance().OnFail("Команда /select работает только в почте и дневнике.");
+          return;
+      }
+  }
+
+  else if (awaiting_mail5_choice_) {
+      int choice = 0;
+      std::istringstream iss_choice(cmd);
+      iss_choice >> choice;
+
+      int moral_lvl = player_.Moral()->GetValue();
+      bool can_refuse = (moral_lvl > -10); // -10 и выше можно отказаться
+      bool can_accept = (moral_lvl < 10);  // 10 и ниже можно принять
+
+      if ((choice == 1 && can_refuse) || (choice == 2 && can_accept)) {
+          awaiting_mail5_choice_ = false;
+          if (choice == 1) {
+              // GOOD END: дневник 5
+              const DiaryEntry* found_entry = diary_.FindById(5);
+              if (found_entry) {
+                  ShowDiaryEntryAndEnd(*found_entry);
+              }
+              std::exit(0);
+          } else if (choice == 2) {
+              // BAD END: бесконечная мини-игра и дневник 6
+              current_mini_game_ = std::make_unique<ProtocolSimon>();
+              bool success = current_mini_game_->Play();
+              (void)success; // успех невозможен
+              const DiaryEntry* found_entry = diary_.FindById(6);
+              if (found_entry) {
+                  ShowDiaryEntryAndEnd(*found_entry);
+              }
+              std::exit(0);
+          }
+      } else {
+          std::cout << "Вариант недоступен! Повторите выбор:\n";
+          ShowMail5Choice();
+      }
       return;
-    }
-    selected_mail_id_ = id;
-
-    if (id == 5) {
-        awaiting_mail5_choice_ = true;
-        Utils::ClearScreen();
-        std::cout << "Отправитель: " << mail_entry->sender << '\n';
-        std::cout << "Тема: " << mail_entry->subject << '\n';
-        std::cout << "===========\n";
-        std::cout << mail_entry->content << "\n\n";
-        std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n\n";
-        ShowMail5Choice();
-        return;
-    } else {
-        awaiting_accept_reject_ = true;
-
-        Utils::ClearScreen();
-        std::cout << "Отправитель: " << mail_entry->sender << '\n';
-        std::cout << "Тема: " << mail_entry->subject << '\n';
-        std::cout << "===========\n";
-        std::cout << mail_entry->content << "\n\n";
-        std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n" << '\n';
-        std::cout << "\nДля принятия заказа введите y/n. Для отмены введите /cancel\n";
-        return;
-    }
-}
-else if (awaiting_mail5_choice_) {
-    int choice = 0;
-    std::istringstream iss_choice(cmd);
-    iss_choice >> choice;
-
-    int moral_lvl = player_.Moral()->GetValue();
-    bool can_refuse = (moral_lvl > -10); // -10 и выше можно отказаться
-    bool can_accept = (moral_lvl < 10);  // 10 и ниже можно принять
-
-    if ((choice == 1 && can_refuse) || (choice == 2 && can_accept)) {
-        awaiting_mail5_choice_ = false;
-        if (choice == 1) {
-            // GOOD END: дневник 5
-            const DiaryEntry* found_entry = diary_.FindById(5);
-            if (found_entry) {
-                ShowDiaryEntryAndEnd(*found_entry);
-            }
-            std::exit(0);
-        } else if (choice == 2) {
-            // BAD END: бесконечная мини-игра и дневник 6
-            current_mini_game_ = std::make_unique<ProtocolSimon>();
-            bool success = current_mini_game_->Play();
-            (void)success; // не выиграешь ты тут
-            const DiaryEntry* found_entry = diary_.FindById(6);
-            if (found_entry) {
-                ShowDiaryEntryAndEnd(*found_entry);
-            }
-            std::exit(0);
-        }
-    } else {
-        std::cout << "Вариант недоступен! Повторите выбор:\n";
-        ShowMail5Choice();
-    }
-    return;
-}
-else if (awaiting_accept_reject_) {
-    if (cmd == "y") {
-      awaiting_accept_reject_ = false;
-      if (selected_mail_id_ != -1)
-        StartMissionByID(selected_mail_id_);
-      selected_mail_id_ = -1;
-      return;
-    } else if (cmd == "n") {
+  }
+  else if (awaiting_accept_reject_) {
+      if (cmd == "y") {
         awaiting_accept_reject_ = false;
-        if (selected_mail_id_ != -1) {
-            MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
-            if (mail_entry) {
-                player_.Moral()->Add(mail_entry->consequence_bad);
-                mail_.RejectMail(selected_mail_id_);
-                EchoAI::Instance().OnFail("Письмо отклонено.");
-            }
-        }
+        if (selected_mail_id_ != -1)
+          StartMissionByID(selected_mail_id_);
         selected_mail_id_ = -1;
-        ShowMail();
         return;
-    } else if (cmd == "/cancel") {
-        awaiting_accept_reject_ = false;
-        selected_mail_id_ = -1;
-        ShowMail();
-    } else {
-      std::cout << "Введите y/n или /cancel\n";
-      return;
-    }
-}
+      } else if (cmd == "n") {
+          awaiting_accept_reject_ = false;
+          if (selected_mail_id_ != -1) {
+              MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
+              if (mail_entry) {
+                  player_.Moral()->Add(mail_entry->consequence_bad);
+                  mail_.RejectMail(selected_mail_id_);
+                  EchoAI::Instance().OnFail("Письмо отклонено.");
+              }
+          }
+          selected_mail_id_ = -1;
+          ShowMail();
+          return;
+      } else if (cmd == "/cancel") {
+          awaiting_accept_reject_ = false;
+          selected_mail_id_ = -1;
+          ShowMail();
+      } else {
+        std::cout << "Введите y/n или /cancel\n";
+        return;
+      }
+  }
   else if (token == "/use") {
     std::string item_id;
     iss >> item_id;

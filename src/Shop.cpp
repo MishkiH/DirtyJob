@@ -89,10 +89,7 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
       EchoAI::Instance().OnStatChange("MaxHP", health->Max());
     }
     player.Inventory()->RemoveItem(item_id);
-  } else if (item_id == "ghostkey") {
-    EchoAI::Instance().OnSuccess("GhostKey готов к использованию для мини-игр взлома.");
-    // GhostKey активируется в мини-играх. todo:: удалить
-  } else if (item_id == "coffee") {
+  } else if (item_id == "coffee") { // TODO: Сделать грёбаный кофе)
     EchoAI::Instance().OnSuccess("Coffee.exe принят. Станешь внимательнее (на время).");
     player.Inventory()->RemoveItem(item_id);
     // Coffee активируется на следующей миссии
