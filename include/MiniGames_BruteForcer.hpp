@@ -1,6 +1,11 @@
 #ifndef MINIGAMES_BRUTEFORCER_HPP_
 #define MINIGAMES_BRUTEFORCER_HPP_
 
+#include <chrono>
+#include <iostream>
+#include <random>
+#include <thread>
+
 #include "MiniGame.hpp"
 
 class BruteForcer : public MiniGame {

@@ -1,18 +1,24 @@
 #ifndef GAME_MANAGER_HPP_
 #define GAME_MANAGER_HPP_
 
-#include <string>
+#include <cstdlib>
+#include <iostream>
 #include <map>
 #include <memory>
-#include "Player.hpp"
-#include "EchoAI.hpp"
-#include "Shop.hpp"
-#include "Mail.hpp"
+#include <random>
+#include <sstream>
+#include <string>
+
 #include "Diary.hpp"
+#include "EchoAI.hpp"
+#include "Mail.hpp"
 #include "MiniGame.hpp"
-#include "MiniGames_FWByPass.hpp"
 #include "MiniGames_BruteForcer.hpp"
+#include "MiniGames_FWByPass.hpp"
 #include "MiniGames_ProtocolSimon.hpp"
+#include "Player.hpp"
+#include "Shop.hpp"
+#include "Utils.hpp"
 
 class GameManager {
  public:

@@ -26,8 +26,8 @@
     ]
   },
   {
-    "time_limit": 15,
-    "max_moves": 34,
+    "time_limit": 16,
+    "max_moves": 52,
     "maze": [
       "################",
       "#S #      #E   #",

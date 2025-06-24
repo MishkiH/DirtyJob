@@ -1,9 +1,12 @@
 #ifndef ECHO_AI_HPP_
 #define ECHO_AI_HPP_
 
-#include <string>
-#include <vector>
+#include <chrono>
+#include <iostream>
 #include <random>
+#include <string>
+#include <thread>
+#include <vector>
 
 class EchoAI {
  public:
@@ -35,7 +38,7 @@ class EchoAI {
   static std::string EchoStyle(const std::string& msg);
 
  private:
-  EchoAI(); // Singleton
+  EchoAI();  // Singleton
   std::mt19937 rng_;
 
   // список реплик для разных событий

@@ -4,8 +4,9 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <typeinfo>
 #include <typeindex>
+#include <typeinfo>
+
 #include "Component.hpp"
 
 class Entity {

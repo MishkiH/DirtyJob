@@ -1,9 +1,7 @@
 #include "MiniGames_BruteForcer.hpp"
+
 #include "EchoAI.hpp"
-#include <iostream>
-#include <random>
-#include <chrono>
-#include <thread>
+#include "Utils.hpp"
 
 bool BruteForcer::Play() {
   EchoAI::Instance().OnMiniGameStart(Name());
@@ -15,7 +13,8 @@ bool BruteForcer::Play() {
     for (int k = 0; k < 8; ++k) {
       code += chars[rand() % chars.size()];
     }
-    std::cout << "Введи этот код как можно быстрее: \033[33m" << code << "\033[0m\n";
+    std::cout << "Введи этот код как можно быстрее:"
+              << Utils::Color(code, "green") << '\n';
     std::string input;
     auto start = std::chrono::steady_clock::now();
     std::cin >> input;

@@ -1,16 +1,18 @@
 #ifndef DIARY_HPP_
 #define DIARY_HPP_
 
-#include <vector>
-#include <string>
+#include <fstream>
+#include <iostream>
 #include <optional>
+#include <string>
+#include <vector>
 
 struct DiaryEntry {
   int id;
   std::string title;
   std::string text;
   bool published = false;
-  std::optional<int> mission_id  = std::nullopt;
+  std::optional<int> mission_id = std::nullopt;
   int moral_effect;
 };
 
@@ -27,7 +29,7 @@ class Diary {
   const DiaryEntry* FindById(int id) const;
   DiaryEntry* FindById(int id);
 
-  private:
+ private:
   std::vector<DiaryEntry> entries_;
   void LoadFromFile(const std::string& data_file);
 };

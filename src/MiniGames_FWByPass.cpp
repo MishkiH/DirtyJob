@@ -1,16 +1,8 @@
 #include "MiniGames_FWByPass.hpp"
+
+#include "../extern/nlohmann/json.hpp"
 #include "EchoAI.hpp"
 #include "Utils.hpp"
-#include "../extern/nlohmann/json.hpp"
-
-#include <atomic>
-#include <chrono>
-#include <conio.h>
-#include <fstream>
-#include <iostream>
-#include <random>
-#include <thread>
-#include <vector>
 
 using json = nlohmann::json;
 
@@ -132,7 +124,7 @@ bool FWByPass::Play() {
 
     std::thread timer_thread([&]() {
       while (running && seconds_left > 0) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        Utils::SleepFor(1000);
         --seconds_left;
         std::cout << "\033[2;1H";
         std::cout << "Осталось ходов: " << (max_moves_ - moves)
@@ -154,7 +146,8 @@ bool FWByPass::Play() {
         }
 
         Utils::ClearScreen();
-        std::cout << "Уровень " << (level + 1) << " из " << kTotalLevels << "\n";
+        std::cout << "Уровень " << (level + 1) << " из " << kTotalLevels
+                  << "\n";
         std::cout << "Осталось ходов: " << (max_moves_ - moves)
                   << "   Времени: " << seconds_left << " сек.\n";
         PrintMaze();
@@ -178,7 +171,7 @@ bool FWByPass::Play() {
       break;
     } else {
       std::cout << "Уровень " << (level + 1) << " пройден!\n";
-      std::this_thread::sleep_for(std::chrono::seconds(2));
+      Utils::SleepFor(2000);
       Utils::ClearScreen();
     }
   }

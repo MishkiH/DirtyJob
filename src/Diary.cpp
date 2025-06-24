@@ -1,13 +1,10 @@
 #include "Diary.hpp"
+
 #include "../extern/nlohmann/json.hpp"
-#include <fstream>
-#include <iostream>
 
 using json = nlohmann::json;
 
-Diary::Diary(const std::string& data_file) {
-  LoadFromFile(data_file);
-}
+Diary::Diary(const std::string& data_file) { LoadFromFile(data_file); }
 
 void Diary::LoadFromFile(const std::string& data_file) {
   std::ifstream file(data_file);
@@ -21,9 +18,9 @@ void Diary::LoadFromFile(const std::string& data_file) {
     e.text = entry.value("text", "");
     e.moral_effect = entry.value("moral_effect", 0);
     if (entry.contains("mission_id") && !entry["mission_id"].is_null())
-        e.mission_id = entry["mission_id"].get<int>();
+      e.mission_id = entry["mission_id"].get<int>();
     else
-        e.mission_id = std::nullopt;
+      e.mission_id = std::nullopt;
     entries_.push_back(e);
   }
 }
@@ -63,22 +60,21 @@ DiaryEntry* Diary::Publish(int num) {
 }
 
 const DiaryEntry* Diary::GetEntryByMissionId(int mission_id) const {
-    for (const auto& entry : entries_) {
-        if (entry.mission_id && *entry.mission_id == mission_id)
-            return &entry;
-    }
-    return nullptr;
+  for (const auto& entry : entries_) {
+    if (entry.mission_id && *entry.mission_id == mission_id) return &entry;
+  }
+  return nullptr;
 }
 
 const DiaryEntry* Diary::FindById(int id) const {
-    for (const auto& entry : entries_) {
-        if (entry.id == id) return &entry;
-    }
-    return nullptr;
+  for (const auto& entry : entries_) {
+    if (entry.id == id) return &entry;
+  }
+  return nullptr;
 }
 DiaryEntry* Diary::FindById(int id) {
-    for (auto& entry : entries_) {
-        if (entry.id == id) return &entry;
-    }
-    return nullptr;
+  for (auto& entry : entries_) {
+    if (entry.id == id) return &entry;
+  }
+  return nullptr;
 }

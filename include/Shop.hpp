@@ -1,9 +1,13 @@
 #ifndef SHOP_HPP_
 #define SHOP_HPP_
 
-#include <vector>
-#include <string>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <map>
+#include <string>
+#include <vector>
+
 #include "Player.hpp"
 
 struct ShopItem {

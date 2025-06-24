@@ -1,11 +1,19 @@
 #ifndef MINIGAMES_FW_BYPASS_HPP_
 #define MINIGAMES_FW_BYPASS_HPP_
 
+#include <conio.h>
+
+#include <atomic>
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include "MiniGame.hpp"
 #include "Player.hpp"
-
-#include <string>
-#include <vector>
 
 class FWByPass : public MiniGame {
  public:

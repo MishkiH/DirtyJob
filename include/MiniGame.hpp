@@ -7,9 +7,9 @@ class MiniGame {
  public:
   virtual ~MiniGame() = default;
 
-  //true, если игрок выиграл
+  // true, если игрок выиграл
   virtual bool Play() = 0;
-  //название для Echo и меню
+  // название для Echo и меню
   virtual std::string Name() const = 0;
 };
 

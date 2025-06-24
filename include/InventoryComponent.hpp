@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+
 #include "Component.hpp"
 
 class InventoryComponent : public Component {
