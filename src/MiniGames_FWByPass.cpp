@@ -14,13 +14,6 @@
 
 using json = nlohmann::json;
 
-<<<<<<< HEAD
-FWByPass::FWByPass(const std::string& maze_file, Player& player)
-    : rows_(0), cols_(0), player_x_(0), player_y_(0), exit_x_(0), exit_y_(0),
-    max_moves_(30), time_limit_(60), player_(player) {};
-
-
-=======
 FWByPass::FWByPass(const std::string& maze_file)
     : maze_file_(maze_file),
       rows_(0),
@@ -29,7 +22,6 @@ FWByPass::FWByPass(const std::string& maze_file)
       player_y_(0),
       exit_x_(0),
       exit_y_(0) {}
->>>>>>> e63cd5999c7d5153852048af49b10ec1c75fcac1
 
 void FWByPass::PrintMaze() const {
   DrawBorder();
@@ -86,66 +78,6 @@ bool FWByPass::MovePlayer(char dir) {
 }
 
 bool FWByPass::Play() {
-<<<<<<< HEAD
-    EchoAI::Instance().OnMiniGameStart(Name());
-    bool win = false;
-    int moves = 0;
-    int max_moves = max_moves_;
-    int time_limit = time_limit_;
-
-    bool coffee = player_.HasCoffee();
-    if (coffee) {
-        // Если активирован кофе, увеличиваем количество ходов и время
-        max_moves += 5;
-        time_limit += 20;
-        EchoAI::Instance().OnSuccess("Coffee.exe активен! У тебя больше времени и ходов на миссию.");
-    }
-
-    std::vector<json> all_mazes;
-    int level = 0;
-    std::cout << "Размер all_mazes: " << all_mazes.size() << std::endl;
-    std::cout << "Текущий уровень: " << level << std::endl;
-    if (level >= all_mazes.size()) {
-        std::cerr << "Ошибка: Уровень выходит за пределы!" << std::endl;
-        return false;  // Прерываем выполнение, если уровень некорректен
-    }
-
-    const auto& maze_obj = all_mazes[level];  // Получаем лабиринт по индексу
-    max_moves_ = maze_obj.value("max_moves", 30);
-    time_limit_ = maze_obj.value("time_limit", 60);
-
-    const auto& maze_json = maze_obj["maze"];
-    rows_ = static_cast<int>(maze_json.size());
-    cols_ = static_cast<int>(maze_json[0].get<std::string>().size());
-
-    maze_.clear();  // Очистить перед новым заполнением
-    for (int y = 0; y < rows_; ++y) {
-        std::string line = maze_json[y];
-        if (line.size() != cols_) {
-            std::cout << "Warning: line size does not match cols_" << std::endl;
-            continue;  // Пропускаем строку, если её размер не совпадает с ожидаемым
-        }
-
-        std::vector<MazeCell> row;
-        for (int x = 0; x < cols_; ++x) {
-            if (x >= line.size()) {
-                std::cout << "Error: out of range for line " << y << ", index " << x << std::endl;
-                continue;
-            }
-            char c = line[x];
-            row.push_back({ c });
-            if (c == 'S') { player_x_ = x; player_y_ = y; }
-            if (c == 'E') { exit_x_ = x; exit_y_ = y; }
-        }
-        maze_.push_back(row);
-    }
-}
-
-
-
-
-
-=======
   EchoAI::Instance().OnMiniGameStart(Name());
   bool overall_win = true;
   const int kTotalLevels = 3;
@@ -254,4 +186,3 @@ bool FWByPass::Play() {
   EchoAI::Instance().OnMiniGameEnd(overall_win);
   return overall_win;
 }
->>>>>>> e63cd5999c7d5153852048af49b10ec1c75fcac1
