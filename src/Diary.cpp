@@ -15,10 +15,7 @@ void Diary::LoadFromFile(const std::string& data_file) {
     e.title = entry.value("title", "");
     e.text = entry.value("text", "");
     e.moral_effect = entry.value("moral_effect", 0);
-    if (entry.contains("mission_id") && !entry["mission_id"].is_null())
-      e.mission_id = entry["mission_id"].get<int>();
-    else
-      e.mission_id = std::nullopt;
+    e.mission_id = entry["mission_id"].get<int>();
     entries_.push_back(e);
   }
 }

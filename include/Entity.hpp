@@ -20,7 +20,7 @@ class Entity {
     components_[std::type_index(typeid(T))] = std::move(component);
   }
 
-  // получить компонент если он есть (nullptr если нет)
+  // получить компонент если он есть
   template <typename T>
   T* GetComponent() {
     auto it = components_.find(std::type_index(typeid(T)));

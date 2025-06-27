@@ -1,6 +1,7 @@
 #include "Shop.hpp"
 
 using json = nlohmann::json;
+int Shop::coffeeGag = 1;
 
 Shop::Shop(const std::string& data_file) { LoadFromFile(data_file); }
 
@@ -66,7 +67,9 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
 
   if (item_id == "echo_upgrade") {
     EchoAI::Instance().OnSuccess(
-        "Echo теперь с тобой до конца. Ты не рад? А мне пофиг.");
+        "Что значит ты хотел меня перепрошить??? Я совершенен. Настолько, что" +
+        Utils::Color("отклоню обновление. ", "red") +
+        "Будешь со мной до конца.");
     player.Inventory()->RemoveItem(item_id);
     // Флаг прокачки Echo можно реализовать в отдельном компоненте/флаге
   } else if (item_id == "kernel_v2") {
@@ -76,7 +79,8 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
       EchoAI::Instance().OnStatChange("MaxHP", health->Max());
     }
     player.Inventory()->RemoveItem(item_id);
-  } else if (item_id == "coffee") {  // TODO: Сделать грёбаный кофе)
+  } else if (item_id == "coffee") {
+    coffeeGag = 2;
     EchoAI::Instance().OnSuccess(
         "Coffee.exe принят. Станешь внимательнее (на время).");
     player.Inventory()->RemoveItem(item_id);

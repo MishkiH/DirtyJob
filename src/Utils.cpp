@@ -6,38 +6,21 @@ void SleepFor(const int& ms) {
   std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-void ClearScreen() {
-  // Получаем дескриптор консоли
+void Utils::ClearScreen() {
   HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-  // Получаем информацию о консольном буфере
+  COORD coordScreen = {0, 0};
+  DWORD charsWritten;
   CONSOLE_SCREEN_BUFFER_INFO csbi;
-  if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-    std::cerr << "Ошибка при получении информации о консольном буфере."
-              << std::endl;
-    return;
-  }
+  DWORD consoleSize;
 
-  // Размеры экрана
-  int cols = csbi.dwSize.X;
-  int rows = csbi.dwSize.Y;
+  if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) return;
+  consoleSize = csbi.dwSize.X * csbi.dwSize.Y;
 
-  // Создаём пустой буфер для очистки экрана
-  COORD bufferSize = {static_cast<SHORT>(cols), static_cast<SHORT>(rows)};
-  COORD bufferCoord = {0, 0};
-  SMALL_RECT writeRegion = {0, 0, static_cast<SHORT>(cols - 1),
-                            static_cast<SHORT>(rows - 1)};
-
-  // Буфер с пробелами (для очистки экрана)
-  std::vector<CHAR_INFO> buffer(cols * rows);
-  for (auto& charInfo : buffer) {
-    charInfo.Char.AsciiChar = ' ';  // Пробел
-    charInfo.Attributes = 0x00;     // Черный фон (без текста)
-  }
-
-  // Очищаем экран
-  WriteConsoleOutput(hConsole, buffer.data(), bufferSize, bufferCoord,
-                     &writeRegion);
+  FillConsoleOutputCharacter(hConsole, ' ', consoleSize, coordScreen,
+                             &charsWritten);
+  FillConsoleOutputAttribute(hConsole, csbi.wAttributes, consoleSize,
+                             coordScreen, &charsWritten);
+  SetConsoleCursorPosition(hConsole, coordScreen);
 }
 
 void PrintSlowlyByChar(const std::string& text) {
@@ -69,7 +52,26 @@ std::string Color(const std::string& text, const std::string& color) {
   if (color == "blue") return "\033[34m" + text + "\033[0m";
   if (color == "magenta") return "\033[35m" + text + "\033[0m";
   if (color == "cyan") return "\033[36m" + text + "\033[0m";
+  if (color == "black") return "\033[90m" + text + "\033[0m";
   return text;
+}
+
+void StartMenu() {
+  Utils::ClearScreen();
+  
+  std::cout << Utils::Color(R"(
+ ██████╗ ██╗██████╗ ████████╗██╗   ██╗         ██╗ ██████╗ ██████╗ 
+ ██╔══██╗██║██╔══██╗╚══██╔══╝╚██╗ ██╔╝         ██║██╔═══██╗██╔══██╗
+ ██║  ██║██║██████╔╝   ██║    ╚████╔╝          ██║██║   ██║██████╔╝
+ ██║  ██║██║██╔══██╗   ██║     ╚██╔╝      ██   ██║██║   ██║██╔══██╗
+ ██████╔╝██║██║  ██║   ██║      ██║       ╚█████╔╝╚██████╔╝██████╔╝
+ ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝        ╚════╝  ╚═════╝ ╚═════╝ 
+)", "cyan");
+
+  std::cout << "\n\n";
+  std::cout << Utils::Color("                    Нажмите Enter, чтобы продолжить...", "cyan");
+  
+  std::cin.get();
 }
 
 }  // namespace Utils

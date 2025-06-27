@@ -71,10 +71,6 @@ bool FWByPass::Play() {
   const int kTotalLevels = 3;
 
   std::ifstream file(maze_file_);
-  if (!file) {
-    EchoAI::Instance().OnFail("Не удалось загрузить файл лабиринтов");
-    return false;
-  }
   json all_mazes;
   file >> all_mazes;
 

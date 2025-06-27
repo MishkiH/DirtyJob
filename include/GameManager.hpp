@@ -25,7 +25,6 @@ class GameManager {
   GameManager();
 
   void Run();
-  static int coffeeGag;
 
  private:
   // рабочие пространства
@@ -41,37 +40,55 @@ class GameManager {
   Mail mail_;
   Diary diary_;
 
-  // новые поля для выбора писем
+  // состояния выбора
   int selected_mail_id_ = -1;
   bool awaiting_accept_reject_ = false;
+  bool awaiting_mail5_choice_ = false;
 
-  // кэш мини-игр (для возможного расширения)
+  // кэш мини-игр
   std::unique_ptr<MiniGame> current_mini_game_;
 
-  // генерация случайных ID рабочих пространств
+  // генерация ID рабочих пространств
   void GenerateWorkspaceIds();
 
   // командный интерфейс
   void ShowPrompt() const;
   void HandleCommand(const std::string& cmd);
+  
+  // обработчики команд
+  void HandleSwitchCommand(std::istringstream& iss);
+  void HandleSelectCommand(std::istringstream& iss);
+  void HandleMail5Choice(const std::string& choice);
+  void HandleAcceptReject(const std::string& cmd);
+  void HandleUseCommand(std::istringstream& iss);
+  void HandleBuyCommand(std::istringstream& iss);
+
+  // переключение рабочих пространств
+  void SwitchToWorkspace(Workspace ws);
 
   // отображение экранов
   void ShowMail();
   void ShowDiary();
   void ShowShop();
   void ShowMain();
-  void ShowStats();
+  void ShowStats();  // Добавлен const
+  void ListWorkspaces() const;  // Добавлен const
 
-  // обработка заказов, запуск мини-игр, и применение их результатов
-  void StartMissionByID(int mail_id);
-  void ShowDiaryEntry(const DiaryEntry& entry);
-  void ShowDiaryEntryAndEnd(const DiaryEntry& entry);
+  // работа с почтой
+  void ShowMailEntry(int id);
+  void HandleRegularMail();
+  void HandleSpecialMail();
   void ShowMail5Choice();
-  bool awaiting_mail5_choice_ = false;
 
-  // служебные
-  void ListWorkspaces() const;
-  Workspace WorkspaceById(const std::string& id) const;
+  // работа с дневником
+  void ShowDiaryEntry(int id, bool show_prompt);
+  void ShowDiaryEntryAndEnd(int id);
+
+  // игровая логика
+  void StartMissionByID(int mail_id);
+  void StartBadEndGame();
+  void HandleMissionFailure();
+  void GameOver();
 };
 
 #endif  // GAME_MANAGER_HPP_

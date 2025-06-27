@@ -18,9 +18,12 @@ EchoAI& EchoAI::Instance() {
 }
 
 void EchoAI::OnPlayerAction(const std::string& action) {
-  std::cout << EchoStyle("[Echo]: ") << "Ты попытался. " << action
-            << ". Ну-ну. Удачи\n";
-  Utils::SleepFor(2000);
+  const std::string base_text = "Загружаемся";
+  for (int i = 1; i <= 3; ++i) {
+    std::string dots(i, '.');
+    std::cout << "\r" << EchoStyle("[Echo]: ") << "Сообщение: \"" << action << "\". " << base_text << dots << std::flush;
+    Utils::SleepFor(900);
+  }
   Utils::ClearScreen();
 }
 
@@ -31,9 +34,8 @@ void EchoAI::OnFail(const std::string& reason) {
 
 void EchoAI::OnSuccess(const std::string& context) {
   std::cout << EchoStyle("[Echo]: ") << "У тебя получилось: " << context
-            << ". Чудо!\n";
-  Utils::SleepFor(2000);
-  Utils::ClearScreen();
+            << ". Фантастиш!";
+  std::cin.ignore();
 }
 
 void EchoAI::OnMiniGameStart(const std::string& name) {
@@ -52,7 +54,7 @@ void EchoAI::OnMiniGameEnd(bool success) {
 void EchoAI::PrintHelp() {
   std::cout
       << EchoStyle("[Echo][HELP]: ")
-      << "Доступные команды: \n/switch {id} - переключиться на локацию {id}, "
+      << "Для особо одарённых напоминаю: \n/switch {id} - переключиться на локацию {id}, "
          "\n/switch_ls - догадаешься, \n/mystats - вывод статистики, \n/use "
          "{name} - применить предмет {name} из инвентаря\n";
 }
@@ -68,8 +70,9 @@ void EchoAI::PrintWelcome() {
       << "Уважаемый пользователь! Вас приветствует нелегальное программное "
          "обеспечение “Хакерский Аудит Систем Кибербезопасности” - NPO HaskOS "
          "v3.12. Я Ваш личный помощник: AI-ассистент Echo! Будем знакомы.\n";
-  Utils::SleepFor(5000);
-  std::cout << EchoStyle("[Echo]: ") << "Кстати. Ты мне уже не нравишься.\n";
+  std::cout << EchoStyle("[Echo]: ") << "Кстати, я уже слил тебя сцеслужбам\n";
+  Utils::SleepFor(7000);
+  std::cout << EchoStyle("[Echo]: ") << "Шутка :)\n";
 }
 
 void EchoAI::OnBuy(const std::string& item_id) {
@@ -79,12 +82,12 @@ void EchoAI::OnBuy(const std::string& item_id) {
 
 void EchoAI::OnStatChange(const std::string& stat, int value) {
   std::cout << EchoStyle("[Echo]: ") << "Параметр [" << stat
-            << "] теперь равен " << value << ". Не то чтобы это тебя спасет.\n";
+            << "] теперь равен " << value << ". Вряд ли это тебя спасет.\n";
 }
 
 void EchoAI::DiaryNote() {
   std::cout << EchoStyle("[Echo][Дневник]: ") << GetRandom(diary_notes_)
-            << "\n";
+            << '\n';
 }
 
 std::string EchoAI::SarcasticRemark() { return GetRandom(sarcastic_); }

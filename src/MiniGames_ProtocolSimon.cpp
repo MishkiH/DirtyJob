@@ -17,9 +17,9 @@ void ShowChar(char c) {
       std::cout << Utils::Color(std::string(1, c), "yellow");
       break;
   }
-  Utils::SleepFor(600 * GameManager::coffeeGag);
+  Utils::SleepFor(600 * Shop::coffeeGag);
   Utils::ClearScreen();
-  Utils::SleepFor(300 * GameManager::coffeeGag);
+  Utils::SleepFor(300 * Shop::coffeeGag);
 }
 
 bool ProtocolSimon::Play() {

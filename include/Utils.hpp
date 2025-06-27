@@ -14,6 +14,7 @@
 
 namespace Utils {
 
+void StartMenu();
 void SleepFor(const int& ms);
 void ClearScreen();
 std::string Color(const std::string& text, const std::string& color);

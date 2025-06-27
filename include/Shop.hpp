@@ -22,6 +22,7 @@ struct ShopItem {
 class Shop {
  public:
   Shop(const std::string& data_file);
+  static int coffeeGag;
 
   void Show() const;
   bool Buy(Player& player, const std::string& item_id);

@@ -9,8 +9,6 @@ GameManager::GameManager()
   current_ws_id_ = ws_ids_[current_ws_];
 }
 
-int GameManager::coffeeGag = 1;
-
 void GameManager::GenerateWorkspaceIds() {
   std::random_device rd;
   std::mt19937 rng(rd());
@@ -31,42 +29,23 @@ void GameManager::GenerateWorkspaceIds() {
 }
 
 void GameManager::Run() {
-  Utils::ClearScreen();
-  // вступление из дневника (id == 0)
-  const DiaryEntry* intro = diary_.FindById(0);
-  if (intro && !intro->published) {
-    Utils::ClearScreen();
-    std::cout << Utils::Color("Запись №1. Конспект.\n", "magenta");
-    std::cout << Utils::Color("\"" + intro->title + "\"\n\n", "yellow");
-    Utils::PrintSlowlyByChar(intro->text);
-    std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
-    char ans;
-    std::cin >> ans;
-    if (ans == 'Y' || ans == 'y') {
-      DiaryEntry* published = diary_.FindById(0);
-      if (published) {
-        published->published = true;
-        auto* moral = player_.Moral();
-        if (moral) moral->Add(published->moral_effect);
-        std::cout << "Запись опубликована!\n";
-      }
-    } else {
-      std::cout << "Запись удалена.\n";
-    }
+  Utils::StartMenu();
+  if (const DiaryEntry* intro = diary_.FindById(0);
+      intro && !intro->published) {
+    ShowDiaryEntry(0, true);
     Utils::SleepFor(600);
     Utils::ClearScreen();
-    ShowMain();
-    EchoAI::Instance().PrintWelcome();
   }
-  bool running = true;
-  while (running) {
+
+  ShowMain();
+  EchoAI::Instance().PrintWelcome();
+
+  while (true) {
     ShowPrompt();
     std::string line;
     std::getline(std::cin, line);
     if (line == "/exit") {
-      current_ws_ = Workspace::Main;
-      current_ws_id_ = ws_ids_[Workspace::Main];
-      ShowMain();
+      SwitchToWorkspace(Workspace::Main);
       continue;
     }
     if (line.empty()) continue;
@@ -75,7 +54,8 @@ void GameManager::Run() {
 }
 
 void GameManager::ShowPrompt() const {
-  std::cout << Utils::Color("[DirtyJob][" + current_ws_id_ + "] $ ", "green");
+  std::cout << Utils::Color("[HaskOS v3.12][" + current_ws_id_ + "] $ ",
+                            "green");
 }
 
 void GameManager::HandleCommand(const std::string& cmd) {
@@ -84,189 +64,57 @@ void GameManager::HandleCommand(const std::string& cmd) {
   iss >> token;
 
   if (token == "/switch") {
-    std::string id;
-    iss >> id;
-    if (workspace_map_.count(id)) {
-      current_ws_ = workspace_map_.at(id);
-      current_ws_id_ = id;
-      EchoAI::Instance().OnPlayerAction("переключение рабочего пространства");
-      switch (current_ws_) {
-        case Workspace::Mail:
-          ShowMail();
-          break;
-        case Workspace::Diary:
-          ShowDiary();
-          break;
-        case Workspace::Shop:
-          ShowShop();
-          break;
-        case Workspace::Main:
-          ShowMain();
-          break;
-      }
-    } else {
-      EchoAI::Instance().OnFail("Нет такого пространства");
-    }
+    HandleSwitchCommand(iss);
   } else if (token == "/switch_ls") {
     ListWorkspaces();
   } else if (token == "/mystats") {
     ShowStats();
   } else if (token == "/select") {
-    int id;
-    iss >> id;
-
-    if (current_ws_ == Workspace::Mail) {
-      MailEntry* mail_entry = mail_.GetMailByID(id);
-      if (!mail_entry) {
-        EchoAI::Instance().OnFail("Письмо не найдено.");
-        return;
-      }
-      selected_mail_id_ = id;
-
-      if (id == 5) {
-        awaiting_mail5_choice_ = true;
-        Utils::ClearScreen();
-        std::cout << "Отправитель: " << mail_entry->sender << '\n';
-        std::cout << "Тема: " << mail_entry->subject << '\n';
-        std::cout << "====================\n";
-        std::cout << mail_entry->content << "\n\n";
-        std::cout << "Награда за выполнение: " << mail_entry->reward
-                  << " ETH\n\n";
-        ShowMail5Choice();
-        return;
-      } else {
-        awaiting_accept_reject_ = true;
-
-        Utils::ClearScreen();
-        std::cout << "Отправитель: " << mail_entry->sender << '\n';
-        std::cout << "Тема: " << mail_entry->subject << '\n';
-        std::cout << "===========\n";
-        std::cout << mail_entry->content << "\n\n";
-        std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n"
-                  << '\n';
-        std::cout << "\nДля принятия заказа введите y/n. Для отмены введите "
-                     "/cancel\n";
-        return;
-      }
-    } else if (current_ws_ == Workspace::Diary) {
-      const DiaryEntry* diary_entry = diary_.FindById(id);
-      if (!diary_entry) {
-        EchoAI::Instance().OnFail("Запись не найдена.");
-        return;
-      }
-      Utils::ClearScreen();
-      std::cout << Utils::Color(
-          "Запись №" + std::to_string(*diary_entry->mission_id + 1) +
-              ". Конспект.\n",
-          "magenta");
-      std::cout << Utils::Color("\"" + diary_entry->title + "\"\n\n", "yellow");
-      Utils::PrintSlowlyByChar(diary_entry->text);
-
-      // влияние на мор.дис
-      std::cout << Utils::Color("\nВлияние на морального диссидента: ",
-                                "yellow");
-      if (diary_entry->moral_effect > 0) std::cout << "+";
-      std::cout << diary_entry->moral_effect << '\n';
-      std::cout << Utils::Color("\nНажмите Enter для возврата в дневник...",
-                                "cyan");
-      std::cin.get();
-      ShowDiary();
-      return;
-    } else {
-      EchoAI::Instance().OnFail(
-          "Команда /select работает только в почте и дневнике.");
-      return;
-    }
-  }
-
-  else if (awaiting_mail5_choice_) {
-    int choice = 0;
-    std::istringstream iss_choice(cmd);
-    iss_choice >> choice;
-
-    int moral_lvl = player_.Moral()->GetValue();
-    bool can_refuse = (moral_lvl > -10);  // -10 и выше можно отказаться
-    bool can_accept = (moral_lvl < 10);   // 10 и ниже можно принять
-
-    if ((choice == 1 && can_refuse) || (choice == 2 && can_accept)) {
-      awaiting_mail5_choice_ = false;
-      if (choice == 1) {
-        // GOOD END: дневник 5
-        Utils::ClearScreen();
-        const DiaryEntry* found_entry = diary_.FindById(5);
-        if (found_entry) {
-          ShowDiaryEntryAndEnd(*found_entry);
-        }
-        std::exit(0);
-      } else if (choice == 2) {
-        // BAD END: бесконечная мини-игра и дневник 6
-        current_mini_game_ = std::make_unique<ProtocolSimon>();
-        bool success = current_mini_game_->Play();
-        (void)success;  // успех невозможен
-        const DiaryEntry* found_entry = diary_.FindById(6);
-        if (found_entry) {
-          ShowDiaryEntryAndEnd(*found_entry);
-        }
-        std::exit(0);
-      }
-    } else {
-      std::cout << "Вариант недоступен! Повторите выбор:\n";
-      ShowMail5Choice();
-    }
-    return;
+    HandleSelectCommand(iss);
+  } else if (awaiting_mail5_choice_) {
+    HandleMail5Choice(cmd);
   } else if (awaiting_accept_reject_) {
-    if (cmd == "y") {
-      awaiting_accept_reject_ = false;
-      if (selected_mail_id_ != -1) StartMissionByID(selected_mail_id_);
-      selected_mail_id_ = -1;
-      return;
-    } else if (cmd == "n") {
-      awaiting_accept_reject_ = false;
-      if (selected_mail_id_ != -1) {
-        MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
-        if (mail_entry) {
-          player_.Moral()->Add(mail_entry->consequence_bad);
-          mail_.RejectMail(selected_mail_id_);
-          EchoAI::Instance().OnFail("Письмо отклонено.");
-        }
-      }
-      selected_mail_id_ = -1;
-      ShowMail();
-      return;
-    } else if (cmd == "/cancel") {
-      awaiting_accept_reject_ = false;
-      selected_mail_id_ = -1;
-      ShowMail();
-    } else {
-      std::cout << "Введите y/n или /cancel\n";
-      return;
-    }
+    HandleAcceptReject(cmd);
   } else if (token == "/use") {
-    std::string item_id;
-    iss >> item_id;
-    if (item_id == "coffee") {
-      coffeeGag = 2;
-      std::cout << EchoAI::EchoStyle("[Echo]: ")
-                << "Coffee.exe принят. Надеюсь, это пойдёт в пользу.\n";
-    }
-    if (item_id.empty()) {
-      EchoAI::Instance().OnFail("Укажи ID предмета.");
-      return;
-    }
-    shop_.ApplyItem(player_, item_id);
+    HandleUseCommand(iss);
   } else if (token == "/buy") {
-    std::string item_id;
-    iss >> item_id;
-    if (item_id.empty()) {
-      EchoAI::Instance().OnFail("Укажи ID предмета.");
-      return;
-    }
-    shop_.Buy(player_, item_id);
+    HandleBuyCommand(iss);
   } else if (token == "/help") {
     EchoAI::Instance().PrintHelp();
   } else {
     EchoAI::Instance().OnFail("Неизвестная команда.");
     EchoAI::Instance().PrintHelp();
+  }
+}
+
+void GameManager::HandleSwitchCommand(std::istringstream& iss) {
+  std::string id;
+  iss >> id;
+  if (workspace_map_.count(id)) {
+    EchoAI::Instance().OnPlayerAction("Переключение рабочего пространства");
+    SwitchToWorkspace(workspace_map_.at(id));
+  } else {
+    EchoAI::Instance().OnFail("Нет такого пространства");
+  }
+}
+
+void GameManager::SwitchToWorkspace(Workspace ws) {
+  current_ws_ = ws;
+  current_ws_id_ = ws_ids_[ws];
+
+  switch (ws) {
+    case Workspace::Mail:
+      ShowMail();
+      break;
+    case Workspace::Diary:
+      ShowDiary();
+      break;
+    case Workspace::Shop:
+      ShowShop();
+      break;
+    case Workspace::Main:
+      ShowMain();
+      break;
   }
 }
 
@@ -278,13 +126,170 @@ void GameManager::ListWorkspaces() const {
   std::cout << "shop:   " << ws_ids_.at(Workspace::Shop) << "\n";
   std::cout << "main:   " << ws_ids_.at(Workspace::Main) << "\n";
   std::cout << EchoAI::EchoStyle("[Echo]: ") +
-                   "Просто напомню: /switch {id} - для перемещения.\n";
+                   "Вдруг ты забыл: /switch {id} - для перемещения.\n";
 }
 
-GameManager::Workspace GameManager::WorkspaceById(const std::string& id) const {
-  auto it = workspace_map_.find(id);
-  if (it != workspace_map_.end()) return it->second;
-  return Workspace::Main;
+void GameManager::HandleSelectCommand(std::istringstream& iss) {
+  int id;
+  iss >> id;
+
+  if (current_ws_ == Workspace::Mail) {
+    selected_mail_id_ = id;
+    if (id == 5) {
+      HandleSpecialMail();
+    } else {
+      HandleRegularMail();
+    }
+  } else if (current_ws_ == Workspace::Diary) {
+    const DiaryEntry* published = diary_.GetEntryById(id);
+    if (!published) {
+      EchoAI::Instance().OnFail("Запись не найдена.");
+      return;
+    }
+
+    ShowDiaryEntry(published->id, false);
+    std::cout << Utils::Color("\nНажмите Enter для возврата в дневник...",
+                              "cyan");
+    std::cin.get();
+    ShowDiary();
+  } else {
+    EchoAI::Instance().OnFail(
+        "Команда /select работает только в почте и дневнике.");
+  }
+}
+
+void GameManager::HandleRegularMail() {
+  MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
+  if (!mail_entry) {
+    EchoAI::Instance().OnFail("Письмо не найдено");
+    return;
+  }
+
+  ShowMailEntry(selected_mail_id_);
+  awaiting_accept_reject_ = true;
+  std::cout << "\nДля принятия заказа введите y/n. Для вывода списка /cancel\n";
+}
+
+void GameManager::HandleSpecialMail() {
+  MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
+  if (!mail_entry) {
+    EchoAI::Instance().OnFail("Письмо не найдено.");
+    return;
+  }
+
+  ShowMailEntry(selected_mail_id_);
+  awaiting_mail5_choice_ = true;
+  ShowMail5Choice();
+}
+
+void GameManager::ShowMailEntry(int id) {
+  MailEntry* mail_entry = mail_.GetMailByID(id);
+  if (!mail_entry) {
+    EchoAI::Instance().OnFail("Письмо не найдено.");
+    return;
+  }
+
+  Utils::ClearScreen();
+  std::cout << "Отправитель: " << mail_entry->sender << '\n';
+  std::cout << "Тема: " << mail_entry->subject << '\n';
+  std::cout << "====================\n";
+  std::cout << mail_entry->content << "\n\n";
+  std::cout << "Награда за выполнение: " << mail_entry->reward << " ETH\n\n";
+}
+
+void GameManager::ShowMail5Choice() {
+  int moral_lvl = player_.Moral()->GetValue();
+  bool can_refuse = (moral_lvl > -10);
+  bool can_accept = (moral_lvl < 10);
+
+  std::cout << Utils::Color(
+      "[1] Отказаться от грязной работы (хорошая концовка)\n",
+      (can_refuse ? "green" : "black"));
+  if (!can_refuse) {
+    std::cout << Utils::Color(
+        "Причина: Уровень морального диссидента слишком низок для отказа\n",
+        "black");
+  }
+
+  std::cout << Utils::Color("[2] Принять грязный заказ (плохая концовка)\n",
+                            (can_accept ? "red" : "black"));
+  if (!can_accept) {
+    std::cout << Utils::Color(
+        "Причина: Уровень морального диссидента слишком высок для принятия\n",
+        "black");
+  }
+
+  std::cout << "Моральный диссидент: " << moral_lvl << "\n";
+  std::cout << "Выберите вариант (1/2): ";
+}
+
+void GameManager::HandleMail5Choice(const std::string& cmd) {
+  int choice = 0;
+  std::istringstream iss_choice(cmd);
+  iss_choice >> choice;
+
+  int moral_lvl = player_.Moral()->GetValue();
+  bool can_refuse = (moral_lvl > -10);
+  bool can_accept = (moral_lvl < 10);
+
+  if ((choice == 1 && can_refuse) || (choice == 2 && can_accept)) {
+    awaiting_mail5_choice_ = false;
+    if (choice == 1) {
+      ShowDiaryEntryAndEnd(5);
+    } else if (choice == 2) {
+      StartBadEndGame();
+    }
+  } else {
+    std::cout << "Вариант недоступен! Повторите выбор:\n";
+    ShowMail5Choice();
+  }
+}
+
+void GameManager::HandleAcceptReject(const std::string& cmd) {
+  if (cmd == "y") {
+    awaiting_accept_reject_ = false;
+    if (selected_mail_id_ != -1) StartMissionByID(selected_mail_id_);
+    selected_mail_id_ = -1;
+  } else if (cmd == "n") {
+    awaiting_accept_reject_ = false;
+    if (selected_mail_id_ != -1) {
+      MailEntry* mail_entry = mail_.GetMailByID(selected_mail_id_);
+      if (mail_entry) {
+        player_.Moral()->Add(mail_entry->consequence_bad);
+        mail_.RejectMail(selected_mail_id_);
+        EchoAI::Instance().OnFail("Письмо отклонено.");
+      }
+    }
+    selected_mail_id_ = -1;
+    ShowMail();
+  } else if (cmd == "/cancel") {
+    awaiting_accept_reject_ = false;
+    selected_mail_id_ = -1;
+    ShowMail();
+  } else {
+    std::cout << "Введите y/n или /cancel\n";
+  }
+}
+
+void GameManager::HandleUseCommand(std::istringstream& iss) {
+  std::string item_id;
+  iss >> item_id;
+
+  if (item_id.empty()) {
+    EchoAI::Instance().OnFail("Укажи ID предмета.");
+    return;
+  }
+  shop_.ApplyItem(player_, item_id);
+}
+
+void GameManager::HandleBuyCommand(std::istringstream& iss) {
+  std::string item_id;
+  iss >> item_id;
+  if (item_id.empty()) {
+    EchoAI::Instance().OnFail("Укажи ID предмета.");
+    return;
+  }
+  shop_.Buy(player_, item_id);
 }
 
 void GameManager::ShowMail() {
@@ -323,7 +328,7 @@ void GameManager::ShowMain() {
   std::cout << Utils::Color("Святая всех святых: твоё рабочее место.\n",
                             "blue");
   std::cout << Utils::Color(
-      "Доступные команды: /switch_ls, /switch {id}, /mystats, /exit\n", "blue");
+      "Доступные команды: /switch_ls, /switch {id}, /mystats\n", "blue");
 }
 
 void GameManager::ShowStats() {
@@ -332,9 +337,9 @@ void GameManager::ShowStats() {
   std::cout << Utils::Color("Параметры игрока:\n", "yellow");
   std::cout << "  Моральный диссидент: " << (moral ? moral->GetValue() : 0)
             << "\n";
-  std::cout << "  Здоровье: " << (health ? health->Get() : 0) << "/"
+  std::cout << "  Степень защиты: " << (health ? health->Get() : 0) << "/"
             << (health ? health->Max() : 0) << "\n";
-  std::cout << "  ETH: " << player_.Inventory()->GetCount("ETH") << "\n";
+  std::cout << "  Баланс ETH: " << player_.Inventory()->GetCount("ETH") << "\n";
 }
 
 void GameManager::StartMissionByID(int mail_id) {
@@ -346,7 +351,6 @@ void GameManager::StartMissionByID(int mail_id) {
 
   EchoAI::Instance().OnPlayerAction("Принятие заказа: " + mail_entry->subject);
 
-  // обычные письма писем
   bool success = false;
   if (mail_entry->id == 1 || mail_entry->id == 2) {
     current_mini_game_ =
@@ -363,93 +367,88 @@ void GameManager::StartMissionByID(int mail_id) {
     mail_entry->finished = true;
     mail_.RejectOtherMailsInCurrentWave(mail_entry->id);
     EchoAI::Instance().OnSuccess(mail_entry->subject);
+    Utils::ClearScreen();
     player_.Inventory()->AddItem("ETH", mail_entry->reward);
     auto* moral = player_.Moral();
     if (moral)
       moral->Add(mail_entry->good ? mail_entry->consequence_good
                                   : mail_entry->consequence_bad);
 
-    // показываем дневниковую запись для этой миссии (если есть)
     const DiaryEntry* found_entry = diary_.FindById(mail_entry->id);
     if (found_entry && !found_entry->published) {
-      ShowDiaryEntry(*found_entry);
+      ShowDiaryEntry(mail_entry->id, true);
     }
     Utils::ClearScreen();
     ShowMain();
-  } else {  // проигрыш — потеря здоровья и сброс
+  } else {
     auto* health = player_.Health();
     if (health) {
       health->Damage(1);
       EchoAI::Instance().OnStatChange("HP", health->Get());
       if (health->Get() <= 0) {
-        std::cout << Utils::Color("GAME OVER. Press any key to try over.\n",
-                                  "red");
-        std::string dummy;
-        std::getline(std::cin, dummy);
-        *health = HealthComponent(3);
-        *player_.Moral() = MoralComponent(0);
-        player_.Inventory()->AddItem("ETH", 0);
-        EchoAI::Instance().OnPlayerAction("Начинаем сначала!");
+        GameOver();
       }
     }
   }
 }
 
-void GameManager::ShowMail5Choice() {
-  int moral_lvl = player_.Moral()->GetValue();
-  bool can_refuse = (moral_lvl > -10);
-  bool can_accept = (moral_lvl < 10);
+void GameManager::ShowDiaryEntry(int id, bool show_prompt) {
+  const DiaryEntry* entry = diary_.FindById(id);
 
-  std::string reason_refuse, reason_accept;
-  if (!can_refuse)
-    reason_refuse =
-        "Уровень морального диссидента слишком низок для отказа от грязной "
-        "работы.";
-  if (!can_accept)
-    reason_accept =
-        "Уровень морального диссидента слишком высок для принятия грязного "
-        "заказа.";
-
-  std::cout << (can_refuse ? "\033[32m" : "\033[90m")
-            << "[1] Отказаться от грязной работы (хорошая концовка)\033[0m\n";
-  if (!can_refuse)
-    std::cout << "\033[90mПричина: " << reason_refuse << "\033[0m\n";
-  std::cout << (can_accept ? "\033[31m" : "\033[90m")
-            << "[2] Принять грязный заказ (плохая концовка)\033[0m\n";
-  if (!can_accept)
-    std::cout << "\033[90mПричина: " << reason_accept << "\033[0m\n";
-  std::cout << "Моральный диссидент: " << moral_lvl << "\n";
-  std::cout << "Выберите вариант (1/2): ";
-}
-
-// для показа записей и завершения
-void GameManager::ShowDiaryEntry(const DiaryEntry& entry) {
+  Utils::ClearScreen();
   std::cout << Utils::Color(
-      "Запись №" + std::to_string(*entry.mission_id) + ". Конспект.\n",
+      "Запись №" + std::to_string(*entry->mission_id + 1) + ". Конспект.\n",
       "magenta");
-  std::cout << Utils::Color("\"" + entry.title + "\"\n\n", "yellow");
-  Utils::PrintSlowlyByChar(entry.text);
-  EchoAI::Instance().DiaryNote();
-  std::cout << "\nY[Опубликовать] | N[Удалить] : ";
-  char ans;
-  std::cin >> ans;
-  auto* moral = player_.Moral();
-  if (ans == 'Y' || ans == 'y') {
-    DiaryEntry* pub = diary_.FindById(entry.id);
-    if (pub) {
-      pub->published = true;
-      if (moral) moral->Add(pub->moral_effect);
+  std::cout << Utils::Color("\"" + entry->title + "\"\n\n", "yellow");
+  Utils::PrintSlowlyByChar(entry->text);
+
+  std::cout << Utils::Color("\nВлияние на морального диссидента: ", "yellow");
+  if (entry->moral_effect > 0) std::cout << "+";
+  std::cout << entry->moral_effect << '\n';
+
+  if (show_prompt) {
+    std::cout << "\nY:[Опубликовать] | N:[Удалить]\n";
+    char ans;
+    std::cin >> ans;
+    DiaryEntry* published = diary_.FindById(id);
+    if (published) {
+      if (ans == 'Y' || ans == 'y') {
+        published->published = true;
+        if (auto* moral = player_.Moral()) {
+          moral->Add(published->moral_effect);
+        }
+      } else {
+        if (auto* moral = player_.Moral()) {
+          moral->Add(-published->moral_effect);
+        }
+      }
     }
-  } else {
-    if (moral) moral->Add(-entry.moral_effect);
   }
-  Utils::SleepFor(600);
 }
 
-void GameManager::ShowDiaryEntryAndEnd(const DiaryEntry& entry) {
-  ShowDiaryEntry(entry);
+void GameManager::StartBadEndGame() {
+  current_mini_game_ = std::make_unique<ProtocolSimon>();
+  bool success = current_mini_game_->Play();
+  (void)success;  // успех невозможен
+  ShowDiaryEntryAndEnd(6);
+}
+
+void GameManager::ShowDiaryEntryAndEnd(int id) {
+  ShowDiaryEntry(id, true);
   Utils::SleepFor(600);
   std::cout << Utils::Color("To be continued..\n", "cyan");
   std::cin.ignore();
-  std::cin.get();
+  std::exit(0);
+}
+
+void GameManager::GameOver() {
+  std::cout << Utils::Color("GAME OVER. Press any key to try over.\n", "red");
+  std::string dummy;
+  std::getline(std::cin, dummy);
+  auto* health = player_.Health();
+  auto* moral = player_.Moral();
+  if (health) *health = HealthComponent(2);
+  if (moral) *moral = MoralComponent(0);
+  player_.Inventory()->AddItem("ETH", 0);
+  EchoAI::Instance().OnPlayerAction("Давай по новой, всё брехня");
 }

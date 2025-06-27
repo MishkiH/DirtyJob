@@ -36,7 +36,7 @@ class EchoAI {
   // генерация случайных стёбных реплик
   std::string SarcasticRemark();
 
-  // для стилизации фразы Echo (синим цветом, например)
+  // для стилизации фраз Echo
   static std::string EchoStyle(const std::string& msg);
 
  private:

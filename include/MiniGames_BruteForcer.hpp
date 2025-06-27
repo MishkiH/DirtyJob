@@ -5,6 +5,8 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <string>
+#include <windows.h>
 
 #include "EchoAI.hpp"
 #include "GameManager.hpp"
