@@ -1,5 +1,4 @@
 #include "GameManager.hpp"
-#include "windows.h"
 
 int main() {
   SetConsoleCP(CP_UTF8);

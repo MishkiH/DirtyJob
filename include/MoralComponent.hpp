@@ -12,7 +12,6 @@ class MoralComponent : public Component {
 
   int GetValue() const { return value_; }
   void Add(int diff) { value_ += diff; }
-  void Set(int value) { value_ = value; }
 
  private:
   int value_;
