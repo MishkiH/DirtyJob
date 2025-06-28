@@ -54,7 +54,7 @@ class GameManager {
   // командный интерфейс
   void ShowPrompt() const;
   void HandleCommand(const std::string& cmd);
-  
+
   // обработчики команд
   void HandleSwitchCommand(std::istringstream& iss);
   void HandleSelectCommand(std::istringstream& iss);
@@ -71,7 +71,7 @@ class GameManager {
   void ShowDiary();
   void ShowShop();
   void ShowMain();
-  void ShowStats();  // Добавлен const
+  void ShowStats();             // Добавлен const
   void ListWorkspaces() const;  // Добавлен const
 
   // работа с почтой

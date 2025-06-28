@@ -1,12 +1,13 @@
 #ifndef MINIGAMES_BRUTEFORCER_HPP_
 #define MINIGAMES_BRUTEFORCER_HPP_
 
+#include <windows.h>
+
 #include <chrono>
 #include <iostream>
 #include <random>
-#include <thread>
 #include <string>
-#include <windows.h>
+#include <thread>
 
 #include "EchoAI.hpp"
 #include "GameManager.hpp"

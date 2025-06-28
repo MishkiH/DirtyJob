@@ -96,17 +96,3 @@ void Mail::RejectMail(int id) {
     }
   }
 }
-
-MailEntry* Mail::Take(int num) {
-  int cnt = 0;
-  for (auto& mail : mails_) {
-    if (!mail.taken && !mail.finished) {
-      ++cnt;
-      if (cnt == num) {
-        mail.taken = true;
-        return &mail;
-      }
-    }
-  }
-  return nullptr;
-}

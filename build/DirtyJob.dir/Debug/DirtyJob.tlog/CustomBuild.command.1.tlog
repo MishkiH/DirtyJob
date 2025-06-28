@@ -1,0 +1,10 @@
+^C:\USERS\MEOWBOOK\DESKTOP\ISTUDY\MYGAME\DIRTYJOB\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Meowbook/Desktop/iStudy/MyGame/DirtyJob -BC:/Users/Meowbook/Desktop/iStudy/MyGame/DirtyJob/build --check-stamp-file C:/Users/Meowbook/Desktop/iStudy/MyGame/DirtyJob/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

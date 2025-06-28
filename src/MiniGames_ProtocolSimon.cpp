@@ -35,7 +35,7 @@ bool ProtocolSimon::Play() {
   std::cout << Utils::Color("=== ProtocolSimon ===\n", "yellow");
   std::cout
       << "Запоминай последовательность мигающих клавиш (WASD) и вводи её! :)\n";
-  std::cout << "Игра идёт до.. первой ошибки! АХ-ХА-ХА-ХАА\n";
+  std::cout << "Взлом продлится до.. первой ошибки! АХ-ХА-ХА-ХАА\n";
   std::cout << "Нажми Enter, чтобы начать ⸜( *ˊᵕˋ* )⸝";
   std::cin.get();
 

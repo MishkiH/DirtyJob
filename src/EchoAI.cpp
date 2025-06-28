@@ -21,7 +21,8 @@ void EchoAI::OnPlayerAction(const std::string& action) {
   const std::string base_text = "Загружаемся";
   for (int i = 1; i <= 3; ++i) {
     std::string dots(i, '.');
-    std::cout << "\r" << EchoStyle("[Echo]: ") << "Сообщение: \"" << action << "\". " << base_text << dots << std::flush;
+    std::cout << "\r" << EchoStyle("[Echo]: ") << "Сообщение: \"" << action
+              << "\". " << base_text << dots << std::flush;
     Utils::SleepFor(900);
   }
   Utils::ClearScreen();
@@ -34,7 +35,7 @@ void EchoAI::OnFail(const std::string& reason) {
 
 void EchoAI::OnSuccess(const std::string& context) {
   std::cout << EchoStyle("[Echo]: ") << "У тебя получилось: " << context
-            << ". Фантастиш!";
+            << ". Фантастиш! Жмай \"Enter\", чтоб продолжить";
   std::cin.ignore();
 }
 
@@ -52,11 +53,11 @@ void EchoAI::OnMiniGameEnd(bool success) {
 }
 
 void EchoAI::PrintHelp() {
-  std::cout
-      << EchoStyle("[Echo][HELP]: ")
-      << "Для особо одарённых напоминаю: \n/switch {id} - переключиться на локацию {id}, "
-         "\n/switch_ls - догадаешься, \n/mystats - вывод статистики, \n/use "
-         "{name} - применить предмет {name} из инвентаря\n";
+  std::cout << EchoStyle("[Echo][HELP]: ") << "Для особо одарённых напоминаю:"
+            << "\n/switch {id} - переключиться на локацию {id}, "
+            << "\n/switch_ls - догадаешься, "
+            << "\n/mystats - вывод статистики,"
+            << "\n/use {name} - применить предмет {name} из инвентаря\n";
 }
 
 void EchoAI::RemindCommand(const std::string& cmd) {

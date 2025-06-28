@@ -24,6 +24,7 @@ void Utils::ClearScreen() {
 }
 
 void PrintSlowlyByChar(const std::string& text) {
+  Utils::SleepFor(2000);
   bool skip = false;
   for (char ch : text) {
     if (!skip && _kbhit()) {  // если нажата клавиша
@@ -58,7 +59,7 @@ std::string Color(const std::string& text, const std::string& color) {
 
 void StartMenu() {
   Utils::ClearScreen();
-  
+
   std::cout << Utils::Color(R"(
  ██████╗ ██╗██████╗ ████████╗██╗   ██╗         ██╗ ██████╗ ██████╗ 
  ██╔══██╗██║██╔══██╗╚══██╔══╝╚██╗ ██╔╝         ██║██╔═══██╗██╔══██╗
@@ -66,11 +67,13 @@ void StartMenu() {
  ██║  ██║██║██╔══██╗   ██║     ╚██╔╝      ██   ██║██║   ██║██╔══██╗
  ██████╔╝██║██║  ██║   ██║      ██║       ╚█████╔╝╚██████╔╝██████╔╝
  ╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝      ╚═╝        ╚════╝  ╚═════╝ ╚═════╝ 
-)", "cyan");
+)",
+                            "cyan");
 
   std::cout << "\n\n";
-  std::cout << Utils::Color("                    Нажмите Enter, чтобы продолжить...", "cyan");
-  
+  std::cout << Utils::Color(
+      "                    Нажмите Enter, чтобы продолжить...", "cyan");
+
   std::cin.get();
 }
 
