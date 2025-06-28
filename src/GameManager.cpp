@@ -30,7 +30,7 @@ void GameManager::GenerateWorkspaceIds() {
 
 void GameManager::Run() {
   Utils::StartMenu();
-  if (const DiaryEntry* intro = diary_.FindById(0);
+  if (DiaryEntry* intro = diary_.FindById(0);
       intro && !intro->published) {
     ShowDiaryEntry(0, true);
     Utils::SleepFor(600);
@@ -374,7 +374,7 @@ void GameManager::StartMissionByID(int mail_id) {
       moral->Add(mail_entry->good ? mail_entry->consequence_good
                                   : mail_entry->consequence_bad);
 
-    const DiaryEntry* found_entry = diary_.FindById(mail_entry->id);
+    DiaryEntry* found_entry = diary_.FindById(mail_entry->id);
     if (found_entry && !found_entry->published) {
       ShowDiaryEntry(mail_entry->id, true);
     }
@@ -393,7 +393,7 @@ void GameManager::StartMissionByID(int mail_id) {
 }
 
 void GameManager::ShowDiaryEntry(int id, bool show_prompt) {
-  const DiaryEntry* entry = diary_.FindById(id);
+  DiaryEntry* entry = diary_.FindById(id);
 
   Utils::ClearScreen();
   std::cout << Utils::Color(

@@ -40,19 +40,6 @@ const DiaryEntry* Diary::GetEntryById(int num) const {
   return nullptr;
 }
 
-const DiaryEntry* Diary::GetEntryByMissionId(int mission_id) const {
-  for (const auto& entry : entries_) {
-    if (entry.mission_id && *entry.mission_id == mission_id) return &entry;
-  }
-  return nullptr;
-}
-
-const DiaryEntry* Diary::FindById(int id) const {
-  for (const auto& entry : entries_) {
-    if (entry.id == id) return &entry;
-  }
-  return nullptr;
-}
 DiaryEntry* Diary::FindById(int id) {
   for (auto& entry : entries_) {
     if (entry.id == id) return &entry;

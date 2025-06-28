@@ -31,7 +31,6 @@ class Mail {
   void ShowInbox() const;
   MailEntry* GetMailByID(int num);
   void RejectMail(int id);
-  MailEntry* Take(int num);  // берём задание, помечаем taken
   void RejectOtherMailsInCurrentWave(int except_id);
 
   int Count() const { return static_cast<int>(mails_.size()); }

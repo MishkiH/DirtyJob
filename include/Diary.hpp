@@ -26,10 +26,7 @@ class Diary {
 
   void Show() const;
   const DiaryEntry* GetEntryById(int num) const;
-  DiaryEntry* Publish(int num);
-  const DiaryEntry* GetEntryByMissionId(int mission_id) const;
 
-  const DiaryEntry* FindById(int id) const;
   DiaryEntry* FindById(int id);
 
  private:

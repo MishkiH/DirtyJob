@@ -69,13 +69,13 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
     EchoAI::Instance().OnSuccess(
         "Что значит ты хотел меня перепрошить??? Я совершенен. Настолько, что" +
         Utils::Color("отклоню обновление. ", "red") +
-        "Будешь со мной до конца.");
+        "Будешь со мной до конца. Окак");
     player.Inventory()->RemoveItem(item_id);
     // Флаг прокачки Echo можно реализовать в отдельном компоненте/флаге
   } else if (item_id == "kernel_v2") {
     auto* health = player.Health();
     if (health) {
-      health->UpgradeMax(1);
+      health->UpgradeMax();
       EchoAI::Instance().OnStatChange("MaxHP", health->Max());
     }
     player.Inventory()->RemoveItem(item_id);

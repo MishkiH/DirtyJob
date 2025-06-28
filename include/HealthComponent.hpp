@@ -17,8 +17,8 @@ class HealthComponent : public Component {
     (hp_ + amount > max_hp_) ? max_hp_ : hp_ + amount;
     ;
   }
-  void UpgradeMax(int by = 1) {
-    max_hp_ += by;
+  void UpgradeMax() {
+    max_hp_ += 1;
     hp_ = max_hp_;
   }
 
