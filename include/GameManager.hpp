@@ -71,8 +71,8 @@ class GameManager {
   void ShowDiary();
   void ShowShop();
   void ShowMain();
-  void ShowStats();             // Добавлен const
-  void ListWorkspaces() const;  // Добавлен const
+  void ShowStats();
+  void ListWorkspaces() const;
 
   // работа с почтой
   void ShowMailEntry(int id);
@@ -87,7 +87,6 @@ class GameManager {
   // игровая логика
   void StartMissionByID(int mail_id);
   void StartBadEndGame();
-  void HandleMissionFailure();
   void GameOver();
 };
 

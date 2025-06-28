@@ -71,7 +71,6 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
         Utils::Color("отклоню обновление. ", "red") +
         "Будешь со мной до конца. Окак");
     player.Inventory()->RemoveItem(item_id);
-    // Флаг прокачки Echo можно реализовать в отдельном компоненте/флаге
   } else if (item_id == "kernel_v2") {
     auto* health = player.Health();
     if (health) {
@@ -84,7 +83,6 @@ void Shop::ApplyItem(Player& player, const std::string& item_id) {
     EchoAI::Instance().OnSuccess(
         "Coffee.exe принят. Станешь внимательнее (на время).");
     player.Inventory()->RemoveItem(item_id);
-    // Coffee активируется на следующей миссии
   } else {
     EchoAI::Instance().OnFail("Этот предмет не предмет.");
   }

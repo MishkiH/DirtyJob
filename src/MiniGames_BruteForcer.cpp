@@ -14,7 +14,6 @@ bool InputWithTimeout(int timeout_seconds, std::string& result) {
   input_received = false;
   user_input.clear();
 
-  // для чтения ввода
   std::thread input_thread(ReadInput);
 
   for (int i = 0; i < timeout_seconds * 10; ++i) {
